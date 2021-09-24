@@ -1,15 +1,15 @@
-import { config } from "dotenv";
+import { config } from 'dotenv';
 config();
-import axios from "axios";
+import axios from 'axios';
 
-const API_VER: string = "v12.0";
+const API_VER: string = 'v12.0';
 axios.defaults.baseURL = `https://graph.facebook.com/${API_VER}`;
 
 const getReportId = async (adAccountId: string): Promise<string> => {
   try {
     const { data } = await axios.post(`/${adAccountId}/insights`, {
       access_token: process.env.ACCESS_TOKEN,
-      level: "ad",
+      level: 'ad',
       time_increment: 1,
     });
     return data.report_run_id;
@@ -42,7 +42,7 @@ const getData = async (reportId: string, after: string = null) => {
       limit: 500,
     };
     if (after) {
-      params["after"] = after;
+      params['after'] = after;
     }
     const {
       data: { data, paging },
@@ -62,4 +62,4 @@ const getAdsInsights = async (adAccountId: string) => {
   data;
 };
 
-getAdsInsights("act_3921338037921594");
+getAdsInsights('act_3921338037921594');
