@@ -1,14 +1,13 @@
-import { config } from 'dotenv';
-config();
-import axios from 'axios';
-import { MongoClient } from 'mongodb';
+require('dotenv').config();
+const axios = require('axios');
+const { MongoClient } = require('mongodb');
 
-const API_VER: string = 'v12.0';
+const API_VER = 'v12.0';
 axios.defaults.baseURL = `https://graph.facebook.com/${API_VER}`;
 
 const mongoClient = new MongoClient(process.env.MONGO_URI);
 
-const getReportId = async (adAccountId: string): Promise<string> => {
+const getReportId = async (adAccountId) => {
   const { data } = await axios.post(`/${adAccountId}/insights`, {
     access_token: process.env.ACCESS_TOKEN,
     fields: [
@@ -63,7 +62,7 @@ const getReportId = async (adAccountId: string): Promise<string> => {
   return data.report_run_id;
 };
 
-const pollReport = async (reportId: string): Promise<string> => {
+const pollReport = async (reportId) => {
   const { data } = await axios.get(`/${reportId}`, {
     params: { access_token: process.env.ACCESS_TOKEN },
   });
@@ -76,10 +75,7 @@ const pollReport = async (reportId: string): Promise<string> => {
       );
 };
 
-const getData = async (
-  reportId: string,
-  after: string = null
-): Promise<Array<Object>> => {
+const getData = async (reportId, after = null) => {
   const params = {
     access_token: process.env.ACCESS_TOKEN,
     limit: 500,
@@ -96,19 +92,19 @@ const getData = async (
   return next ? [...data, await getData(reportId, next)] : [...data];
 };
 
-const getAdsInsights = async (adAccountId: string): Promise<Array<Object>> => {
+const getAdsInsights = async (adAccountId) => {
   const reportId = await pollReport(await getReportId(adAccountId));
   const data = await getData(reportId);
   return data;
 };
 
-const loadMongo = async (data: Array<Object>) => {
+const loadMongo = async (data) => {
   await mongoClient.connect();
   const actionTypeMap = ({ action_type, value }) => ({
     action_type,
     value: Number(value),
   });
-  const bulkUpdateOps = data.map((item: any) => ({
+  const bulkUpdateOps = data.map((item) => ({
     updateOne: {
       filter: {
         date_start: new Date(item.date_start),
