@@ -2,60 +2,28 @@ require('dotenv').config();
 const axios = require('axios');
 const { MongoClient } = require('mongodb');
 
+const { fbAdsSchema, FacebookAdsInsights } = require('./models');
+
 const API_VER = 'v12.0';
 axios.defaults.baseURL = `https://graph.facebook.com/${API_VER}`;
 
 const mongoClient = new MongoClient(process.env.MONGO_URI);
 
-const getReportId = async (adAccountId) => {
+const getReportId = async (adAccountId, attempt = 0) => {
+  try {
+    return pollReport(sendReportRequest(adAccountId));
+  } catch (err) {
+    console.log(err.message, attempt);
+    return await getReportId(adAccountId, attempt + 1);
+  }
+};
+
+const sendReportRequest = async (adAccountId) => {
   const { data } = await axios.post(`/${adAccountId}/insights`, {
     access_token: process.env.ACCESS_TOKEN,
-    fields: [
-      'date_start',
-      'date_stop',
-      'account_id',
-      'account_name',
-      'campaign_id',
-      'campaign_name',
-      'adset_id',
-      'adset_name',
-      'ad_id',
-      'ad_name',
-      'account_currency',
-      'actions',
-      'action_values',
-      'clicks',
-      'conversion_rate_ranking',
-      'conversion_values',
-      'conversions',
-      'cost_per_action_type',
-      'cost_per_conversion',
-      'cost_per_unique_action_type',
-      'cost_per_unique_click',
-      'cpc',
-      'cpm',
-      'ctr',
-      'engagement_rate_ranking',
-      'frequency',
-      'impressions',
-      'inline_link_click_ctr',
-      'inline_link_clicks',
-      'objective',
-      'optimization_goal',
-      'quality_ranking',
-      'reach',
-      'spend',
-      'unique_actions',
-      'unique_clicks',
-      'unique_ctr',
-      'unique_link_clicks_ctr',
-      'video_30_sec_watched_actions',
-      'video_p100_watched_actions',
-      'video_p25_watched_actions',
-      'video_p50_watched_actions',
-      'video_p75_watched_actions',
-      'video_p95_watched_actions',
-    ].join(','),
+    fields: Object.entries(fbAdsSchema.obj)
+      .map((i) => i[0])
+      .join(','),
     level: 'ad',
     time_increment: 1,
   });
@@ -71,7 +39,7 @@ const pollReport = async (reportId) => {
     : new Promise((resolve) =>
         setTimeout(() => {
           setTimeout(() => resolve(pollReport(reportId)));
-        }, 5000)
+        }, 10000)
       );
 };
 
