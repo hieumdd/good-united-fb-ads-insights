@@ -2,10 +2,10 @@ const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
 
-const actionBreakdowns = {
+const actionBreakdowns = [{
   action_type: String,
   value: Number,
-};
+}];
 
 const fbAdsSchema = new Schema(
   {
@@ -54,7 +54,7 @@ const fbAdsSchema = new Schema(
     video_p75_watched_actions: actionBreakdowns,
     video_p95_watched_actions: actionBreakdowns,
   },
-  { collection: 'fb_ads_raw' }
+  { collection: 'FacebookAdsInsightsRaw' }
 );
 
 const FacebookAdsInsights = mongoose.model(
