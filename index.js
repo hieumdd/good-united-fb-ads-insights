@@ -56,12 +56,12 @@ const main = async () => {
     { model: FacebookAdsInsights, keys, fields },
     data
   );
-  await fs.writeFile('exports/errors.json', JSON.stringify(err));
+  await fs.writeFile('exports/errors.json', JSON.stringify(err, null, 4));
   return {
     err,
     loadResults,
   };
 };
 
-const run = main();
+const run = await main();
 console.log(run);
