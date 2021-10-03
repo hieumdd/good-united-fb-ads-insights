@@ -83,12 +83,14 @@ const getAdsInsights = async (options) => {
       apiCampaignId: options.campaignId,
     }));
   } catch (err) {
-    console.log(err.response.data.error, options);
+    const error = err.response.data?.error ?? err.message;
+    console.log(error, options);
     return [
       {
         apiNonProfit: options.nonProfit,
         apiCampaignId: options.campaignId,
-        err: err.response.data.error,
+        apiAdAccountId: options.adAccountId,
+        err: error,
       },
     ];
   }

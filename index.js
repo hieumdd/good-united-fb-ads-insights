@@ -63,5 +63,4 @@ const main = async () => {
   };
 };
 
-const run = await main();
-console.log(run);
+main().then((run) => console.log(JSON.stringify(run, null, 4)));
