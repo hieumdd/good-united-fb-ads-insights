@@ -30,7 +30,7 @@ const sendReportRequest = async ({ adAccountId, start, end }) => {
   return data.report_run_id;
 };
 
-const pollReport = async (reportId) => {
+const pollReport = async (reportId, attempt = 0) => {
   const { data } = await instance.get(`/${reportId}`, {
     params: { access_token: process.env.ACCESS_TOKEN },
   });
@@ -41,15 +41,27 @@ const pollReport = async (reportId) => {
     return reportId;
   } else if (data.async_status === 'Job Failed') {
     throw 'Async job Failed';
-  } else {
+  } else if (attempt <= 20) {
     await new Promise((resolve) => setTimeout(resolve, 10000));
     return pollReport(reportId);
+  } else if (attempt > 20) {
+    throw 'Async job Timeout';
   }
 };
 
-const getReportId = async (options) => {
-  const reportId = await sendReportRequest(options);
-  return pollReport(reportId);
+const getReportId = async (options, attempt = 0) => {
+  try {
+    const reportId = await sendReportRequest(options);
+    return pollReport(reportId);
+  } catch (err) {
+    if (err.isAxiosError & (err.response.status === 400)) {
+      throw err;
+    } else if (attempt < 3) {
+      return getReportId(options, attempt + 1);
+    } else {
+      throw err;
+    }
+  }
 };
 
 const getData = async (reportId, after = null) => {
@@ -77,18 +89,19 @@ const getAdsInsights = async (options) => {
   try {
     const reportId = await getReportId(options);
     const data = await getData(reportId);
+    // console.log('done');
     return data.map((i) => ({
       ...i,
+      apiEventId: options.eventId,
       apiNonProfit: options.nonProfit,
-      apiCampaignId: options.campaignId,
     }));
   } catch (err) {
-    const error = err.response.data?.error ?? err.message;
+    const error = err.response?.data.error ?? err.message;
     console.log(error, options);
     return [
       {
         apiNonProfit: options.nonProfit,
-        apiCampaignId: options.campaignId,
+        apiEventId: options.campaignId,
         apiAdAccountId: options.adAccountId,
         err: error,
       },
