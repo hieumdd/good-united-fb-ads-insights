@@ -13,7 +13,7 @@ const fbAdsSchema = new Schema(
     date_stop: { type: Date, required: true },
     account_id: { type: Number, required: true },
     campaign_id: { type: Number, required: true },
-    apiCampaignId: { type: String, required: true },
+    apiEventId: { type: String, required: true },
     apiNonProfit: { type: String, required: true },
     account_name: String,
     campaign_name: String,

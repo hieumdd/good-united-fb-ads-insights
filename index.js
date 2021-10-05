@@ -24,7 +24,7 @@ const getAdAccounts = async () => {
 const getEvents = async () => {
   const { data } = await instance.get('/events');
   return data.map((i) => ({
-    campaignId: i['Campaign ID'],
+    eventId: i['ID'],
     nonProfit: i['Nonprofit'],
     start: i['Live Date'],
     end: i['Start Date'],
