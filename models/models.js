@@ -2,10 +2,12 @@ const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
 
-const actionBreakdowns = [{
-  action_type: String,
-  value: Number,
-}];
+const actionBreakdowns = [
+  {
+    action_type: String,
+    value: Number,
+  },
+];
 
 const fbAdsSchema = new Schema(
   {
@@ -20,31 +22,31 @@ const fbAdsSchema = new Schema(
     account_currency: String,
     actions: actionBreakdowns,
     action_values: actionBreakdowns,
-    clicks: Number,
+    clicks: { type: Number, agg: 'sum' },
     conversion_rate_ranking: String,
     conversion_values: actionBreakdowns,
     conversions: actionBreakdowns,
     cost_per_action_type: actionBreakdowns,
     cost_per_conversion: actionBreakdowns,
     cost_per_unique_action_type: actionBreakdowns,
-    cost_per_unique_click: Number,
-    cpc: Number,
-    cpm: Number,
-    ctr: Number,
+    cost_per_unique_click: { type: Number, agg: 'avg' },
+    cpc: { type: Number, agg: 'avg' },
+    cpm: { type: Number, agg: 'avg' },
+    ctr: { type: Number, agg: 'avg' },
     engagement_rate_ranking: String,
-    frequency: Number,
-    impressions: Number,
+    frequency: { type: Number, agg: 'avg' },
+    impressions: { type: Number, agg: 'sum' },
     inline_link_click_ctr: Number,
-    inline_link_clicks: Number,
+    inline_link_clicks: { type: Number, agg: 'sum' },
     objective: String,
     optimization_goal: String,
     quality_ranking: String,
-    reach: Number,
-    spend: Number,
+    reach: { type: Number, agg: 'sum' },
+    spend: { type: Number, agg: 'sum' },
     unique_actions: actionBreakdowns,
-    unique_clicks: Number,
-    unique_ctr: Number,
-    unique_link_clicks_ctr: Number,
+    unique_clicks: { type: Number, agg: 'sum' },
+    unique_ctr: { type: Number, agg: 'avg' },
+    unique_link_clicks_ctr: { type: Number, agg: 'avg' },
     video_30_sec_watched_actions: actionBreakdowns,
     video_p100_watched_actions: actionBreakdowns,
     video_p25_watched_actions: actionBreakdowns,

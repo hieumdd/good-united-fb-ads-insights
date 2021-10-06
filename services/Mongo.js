@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const loadMongo = async ({model, keys, fields}, data) => {
+const loadMongo = async ({ model, keys, fields }, data) => {
   const bulkUpdateOps = data.map((item) => ({
     updateOne: {
       filter: Object.fromEntries(keys.map((i) => [i, item[i]])),
@@ -25,6 +25,27 @@ const loadMongo = async ({model, keys, fields}, data) => {
   }
 };
 
+const createView = async (viewName, viewOn, pipeline) => {
+  try {
+    const { connection } = await mongoose.connect(process.env.MONGO_URI);
+    const currentViews = await connection.db
+      .listCollections({ name: viewName })
+      .toArray();
+    if (currentViews.length !== 0) {
+      await connection.db.dropCollection(viewName);
+    }
+    await connection.db.createCollection(viewName, {
+      viewOn,
+      pipeline,
+    });
+  } catch (err) {
+    console.log(err);
+  } finally {
+    mongoose.disconnect();
+  }
+};
+
 module.exports = {
   loadMongo,
+  createView,
 };
