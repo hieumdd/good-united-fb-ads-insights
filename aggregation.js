@@ -6,11 +6,9 @@ const aggregationPipelines = (schema) => {
   const nested = Object.entries(schema.tree)
     .filter(([_, type]) => Array.isArray(type))
     .map(([path, _]) => ({ path }));
-  // .slice(1, 2);
   const scalar = Object.entries(fbAdsSchema.tree)
     .filter(([_, type]) => !Array.isArray(type) & (type.agg !== undefined))
     .map(([path, type]) => ({ path, agg: type.agg }));
-  // .slice(1, 2);
 
   const facet = {
     $facet: {

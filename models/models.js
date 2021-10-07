@@ -47,12 +47,6 @@ const fbAdsSchema = new Schema(
     unique_clicks: { type: Number, agg: 'sum' },
     unique_ctr: { type: Number, agg: 'avg' },
     unique_link_clicks_ctr: { type: Number, agg: 'avg' },
-    video_30_sec_watched_actions: actionBreakdowns,
-    video_p100_watched_actions: actionBreakdowns,
-    video_p25_watched_actions: actionBreakdowns,
-    video_p50_watched_actions: actionBreakdowns,
-    video_p75_watched_actions: actionBreakdowns,
-    video_p95_watched_actions: actionBreakdowns,
   },
   { collection: 'FacebookAdsInsightsRaw' }
 );

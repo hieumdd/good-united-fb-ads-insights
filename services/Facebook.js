@@ -43,6 +43,7 @@ const pollReport = async (reportId, attempt = 0) => {
     throw 'Async job Failed';
   } else if (attempt <= 20) {
     await new Promise((resolve) => setTimeout(resolve, 10000));
+    console.log('Polling', reportId);
     return pollReport(reportId);
   } else if (attempt > 20) {
     throw 'Async job Timeout';
@@ -54,11 +55,12 @@ const getReportId = async (options, attempt = 0) => {
     const reportId = await sendReportRequest(options);
     return pollReport(reportId);
   } catch (err) {
-    if (err.isAxiosError & (err.response.status === 400)) {
+    if (err.isAxiosError & (err.response?.status === 400)) {
       throw err;
-    } else if (attempt < 3) {
+    } else if (attempt < 2) {
       return getReportId(options, attempt + 1);
     } else {
+      console.log(err);
       throw err;
     }
   }
@@ -89,7 +91,6 @@ const getAdsInsights = async (options) => {
   try {
     const reportId = await getReportId(options);
     const data = await getData(reportId);
-    // console.log('done');
     return data.map((i) => ({
       ...i,
       apiEventId: options.eventId,
