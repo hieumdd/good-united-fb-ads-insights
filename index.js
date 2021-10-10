@@ -44,7 +44,8 @@ const main = async () => {
         adAccountId: id,
       }));
     })
-    .flat();
+    .flat()
+    .filter(({ nonProfit }) => nonProfit !== 'American Cancer Society');
   const results = await (
     await Promise.all(
       eventsWithAdAccount.map(async (i) => await getAdsInsights(i))

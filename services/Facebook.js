@@ -66,30 +66,33 @@ const getReportId = async (options, attempt = 0) => {
   }
 };
 
-const getData = async (reportId, after = null) => {
+const getData = async (reportId, _after = null) => {
   const params = {
     access_token: process.env.ACCESS_TOKEN,
     limit: 500,
   };
-  if (after) {
-    params.after = after;
+  if (_after) {
+    params.after = _after;
   }
   try {
     const {
-      data: { data, paging },
+      data: {
+        data,
+        paging: {
+          cursors: { after },
+          next,
+        },
+      },
     } = await instance.get(`/${reportId}/insights`, {
       params,
     });
-    const {
-      cursors: { after },
-      next,
-    } = paging;
     return next ? [...data, await getData(reportId, after)] : [...data];
   } catch (err) {
     if (err.isAxiosError & (err.response?.status === 400)) {
+      console.log(err);
       throw err;
     } else {
-      return await getData(reportId, after);
+      return await getData(reportId, _after);
     }
   }
 };
