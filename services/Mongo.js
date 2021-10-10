@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const loadMongo = async ({ model, keys, fields }, data) => {
+const loadMongo = async ({ model, keys, fields }, data) => { // eslint-disable-line
   const bulkUpdateOps = data.map((item) => ({
     updateOne: {
       filter: Object.fromEntries(keys.map((i) => [i, item[i]])),
@@ -10,8 +10,8 @@ const loadMongo = async ({ model, keys, fields }, data) => {
   }));
   try {
     await mongoose.connect(process.env.MONGO_URI);
-    ({ deletedCount, insertedCount, modifiedCount, upsertedCount } =
-      await model.bulkWrite(bulkUpdateOps));
+    const { deletedCount, insertedCount, modifiedCount, upsertedCount } =
+      await model.bulkWrite(bulkUpdateOps);
     return {
       deletedCount,
       insertedCount,

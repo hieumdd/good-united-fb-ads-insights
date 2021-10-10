@@ -30,23 +30,23 @@ const sendReportRequest = async ({ adAccountId, start, end }) => {
   return data.report_run_id;
 };
 
-const pollReport = async (reportId, attempt = 0) => {
+const pollReport = async (reportId, attempt = 0) => { // eslint-disable-line
   const { data } = await instance.get(`/${reportId}`, {
     params: { access_token: process.env.ACCESS_TOKEN },
   });
   if (
-    (data.async_percent_completion === 100) &
-    (data.async_status === 'Job Completed')
+    data.async_percent_completion === 100 &&
+    data.async_status === 'Job Completed'
   ) {
     return reportId;
   } else if (data.async_status === 'Job Failed') {
-    throw 'Async job Failed';
+    throw Error('Async job Failed');
   } else if (attempt <= 20) {
     await new Promise((resolve) => setTimeout(resolve, 10000));
     console.log('Polling', reportId);
     return pollReport(reportId);
   } else if (attempt > 20) {
-    throw 'Async job Timeout';
+    throw Error('Async job Timeout');
   }
 };
 
@@ -55,7 +55,7 @@ const getReportId = async (options, attempt = 0) => {
     const reportId = await sendReportRequest(options);
     return pollReport(reportId);
   } catch (err) {
-    if (err.isAxiosError & (err.response?.status === 400)) {
+    if (err.isAxiosError && err.response?.status === 400) {
       throw err;
     } else if (attempt < 2) {
       return getReportId(options, attempt + 1);
@@ -88,11 +88,11 @@ const getData = async (reportId, _after = null) => {
     });
     return next ? [...data, await getData(reportId, after)] : [...data];
   } catch (err) {
-    if (err.isAxiosError & (err.response?.status === 400)) {
+    if (err.isAxiosError && err.response?.status === 400) {
       console.log(err);
       throw err;
     } else {
-      return await getData(reportId, _after);
+      return getData(reportId, _after);
     }
   }
 };

@@ -17,7 +17,7 @@ const getAdAccounts = async () => {
   const { data } = await instance.get('/adAccounts');
   return Object.entries(data).map(([key, value]) => ({
     adAccount: key,
-    ids: value.map((i) => i.trim()).map((i) => (i ? i : null)),
+    ids: value.map((i) => i.trim()).map((i) => (i || null)),
   }));
 };
 
@@ -48,7 +48,7 @@ const main = async () => {
     .filter(({ nonProfit }) => nonProfit !== 'American Cancer Society');
   const results = await (
     await Promise.all(
-      eventsWithAdAccount.map(async (i) => await getAdsInsights(i))
+      eventsWithAdAccount.map(async (i) => getAdsInsights(i))
     )
   ).flat();
   const data = results.filter((i) => !i['err']);

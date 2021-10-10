@@ -13,11 +13,9 @@
     },
     "rules": {
         "no-console": 0,
-        "no-unused-variable": [
-            true,
-            {
-                "ignore-pattern": "^_"
-            }
-        ]
+        "no-unused-variable": 0,
+        "no-unused-vars": 0,
+        "no-else-return": 0,
+        "dot-notation": 0
     }
 }
