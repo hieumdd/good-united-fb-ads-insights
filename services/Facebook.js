@@ -80,10 +80,17 @@ const getData = async (reportId, after = null) => {
     } = await instance.get(`/${reportId}/insights`, {
       params,
     });
-    const { next } = paging;
-    return next ? [...data, await getData(reportId, next)] : [...data];
+    const {
+      cursors: { after },
+      next,
+    } = paging;
+    return next ? [...data, await getData(reportId, after)] : [...data];
   } catch (err) {
-    return await getData(reportId, after);
+    if (err.isAxiosError & (err.response?.status === 400)) {
+      throw err;
+    } else {
+      return await getData(reportId, after);
+    }
   }
 };
 
