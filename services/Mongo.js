@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const loadMongo = async ({ model, keys, fields }, data) => { // eslint-disable-line
+const loadMongo = async ({ model, keys, fields }, data) => {
   const bulkUpdateOps = data.map((item) => ({
     updateOne: {
       filter: Object.fromEntries(keys.map((i) => [i, item[i]])),
@@ -10,16 +10,20 @@ const loadMongo = async ({ model, keys, fields }, data) => { // eslint-disable-l
   }));
   try {
     await mongoose.connect(process.env.MONGO_URI);
+    console.log('Loading to Mongo...');
     const { deletedCount, insertedCount, modifiedCount, upsertedCount } =
       await model.bulkWrite(bulkUpdateOps);
-    return {
-      deletedCount,
-      insertedCount,
-      modifiedCount,
-      upsertedCount,
-    };
+    return [
+      null,
+      {
+        deletedCount,
+        insertedCount,
+        modifiedCount,
+        upsertedCount,
+      },
+    ];
   } catch (err) {
-    console.log(err.message);
+    return [err, null];
   } finally {
     mongoose.disconnect();
   }
@@ -38,8 +42,9 @@ const createView = async (viewName, viewOn, pipeline) => {
       viewOn,
       pipeline,
     });
+    return [null, 'Loaded to Mongo']
   } catch (err) {
-    console.log(err);
+    return [err, null];
   } finally {
     mongoose.disconnect();
   }

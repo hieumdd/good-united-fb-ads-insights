@@ -17,7 +17,7 @@ const getAdAccounts = async () => {
   const { data } = await instance.get('/adAccounts');
   return Object.entries(data).map(([key, value]) => ({
     adAccount: key,
-    ids: value.map((i) => i.trim()).map((i) => (i || null)),
+    ids: value.map((i) => i.trim()).map((i) => i || null),
   }));
 };
 
@@ -44,19 +44,17 @@ const main = async () => {
         adAccountId: id,
       }));
     })
-    .flat()
-    .filter(({ nonProfit }) => nonProfit !== 'American Cancer Society');
+    .flat();
   const results = await (
-    await Promise.all(
-      eventsWithAdAccount.map(async (i) => getAdsInsights(i))
-    )
+    await Promise.all(eventsWithAdAccount.map(async (i) => getAdsInsights(i)))
   ).flat();
   const data = results.filter((i) => !i['err']);
   const err = results.filter((i) => i['err']);
-  const loadResults = await loadMongo(
+  const [loadErr, loadResults] = await loadMongo(
     { model: FacebookAdsInsights, keys, fields },
     data
   );
+  if (loadErr) return console.log(loadErr);
   await fs.writeFile('exports/errors.json', JSON.stringify(err, null, 4));
   return {
     err,
