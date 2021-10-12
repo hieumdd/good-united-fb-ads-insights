@@ -57,10 +57,10 @@ const FacebookAdsInsights = mongoose.model(
 );
 
 const keys = Object.entries(fbAdsSchema.obj)
-  .filter(([_, type]) => type.required)
-  .map(([name, _]) => name);
+  .filter(([, type]) => type.required)
+  .map(([name, ]) => name);
 
-const fields = Object.entries(fbAdsSchema.obj).map(([name, _]) => name);
+const fields = Object.entries(fbAdsSchema.obj).map(([name, ]) => name);
 
 module.exports = {
   fbAdsSchema,

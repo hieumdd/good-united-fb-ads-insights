@@ -1,6 +1,8 @@
 require('dotenv').config();
 const fs = require('fs/promises');
 const axios = require('axios');
+// const dayjs = require('dayjs');
+const { groupBy } = require('lodash');
 
 const { getAdsInsights } = require('./services/Facebook');
 const { loadMongo } = require('./services/Mongo');
@@ -32,8 +34,10 @@ const getEvents = async () => {
 };
 
 const main = async () => {
-  const events = await getEvents();
-  const adAccounts = await getAdAccounts();
+  const [events, adAccounts] = await Promise.all([
+    getEvents(),
+    getAdAccounts(),
+  ]);
   const eventsWithAdAccount = events
     .map((event) => {
       const mappedAdAccount = adAccounts.find(
@@ -45,9 +49,34 @@ const main = async () => {
       }));
     })
     .flat();
+  // const eventsRecent = eventsWithAdAccount.filter(
+  //   ({ end }) => dayjs(end) > dayjs().subtract(8, 'd')
+  // );
+  const eventsGrouped = Object.entries(
+    groupBy(eventsWithAdAccount, ({ adAccountId, start, end }) =>
+      JSON.stringify({ adAccountId, start, end })
+    )
+  )
+    .map(([options, event]) => ({
+      options: JSON.parse(options),
+      event,
+    })).slice(1, 5);
   const results = await (
-    await Promise.all(eventsWithAdAccount.map(async (i) => getAdsInsights(i)))
-  ).flat();
+    await Promise.all(
+      eventsGrouped.map(async (i) => ({
+        event: i.event,
+        data: await getAdsInsights(i.options),
+      }))
+    )
+  ).map(({ event, data }) =>
+    event.map((i) =>
+      data.map((d) => ({
+        ...d,
+        apiEventId: i.eventId,
+        apiNonProfit: i.nonProfit,
+      }))
+    )
+  ).flat(2);
   const data = results.filter((i) => !i['err']);
   const err = results.filter((i) => i['err']);
   const [loadErr, loadResults] = await loadMongo(

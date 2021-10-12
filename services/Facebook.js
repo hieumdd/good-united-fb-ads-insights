@@ -94,13 +94,14 @@ const getData = async (reportId) => {
 
 const getAdsInsights = async (options) => {
   const handleErr = (err) => {
-    const { message } = err.response?.data?.error;
+    let message;
+    if (err.isAxiosError) {
+      message = err.response?.data.error.message;
+    }
     console.log(message ?? err, options);
     return [
       {
-        apiNonProfit: options.nonProfit,
-        apiEventId: options.campaignId,
-        apiAdAccountId: options.adAccountId,
+        ...options,
         err: message ?? err,
       },
     ];
@@ -110,13 +111,9 @@ const getAdsInsights = async (options) => {
   if (getReportErr) return handleErr(getReportErr);
 
   const [getInsightsErr, data] = await getData(reportId);
-  console.log('Done', options);
   if (getInsightsErr) return handleErr(getInsightsErr);
-  return data.map((i) => ({
-    ...i,
-    apiEventId: options.eventId,
-    apiNonProfit: options.nonProfit,
-  }));
+  if (data) console.log('Done', options);
+  return data;
 };
 
 module.exports = {
