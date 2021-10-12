@@ -82,7 +82,7 @@ const getData = async (reportId) => {
     } = await instance.get(`/${reportId}/insights`, {
       params,
     });
-    return next ? [...data, await getFromReport(after)] : [...data];
+    return next ? [...data, ...await getFromReport(after)] : [...data];
   };
 
   try {

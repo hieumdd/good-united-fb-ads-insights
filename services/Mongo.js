@@ -12,7 +12,7 @@ const loadMongo = async ({ model, keys, fields }, data) => {
     await mongoose.connect(process.env.MONGO_URI);
     console.log('Loading to Mongo...');
     const { deletedCount, insertedCount, modifiedCount, upsertedCount } =
-      await model.bulkWrite(bulkUpdateOps);
+      await model.bulkWrite(bulkUpdateOps, { ordered: false });
     return [
       null,
       {
@@ -42,7 +42,7 @@ const createView = async (viewName, viewOn, pipeline) => {
       viewOn,
       pipeline,
     });
-    return [null, 'Loaded to Mongo']
+    return [null, 'Loaded to Mongo'];
   } catch (err) {
     return [err, null];
   } finally {

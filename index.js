@@ -60,7 +60,7 @@ const main = async () => {
     .map(([options, event]) => ({
       options: JSON.parse(options),
       event,
-    })).slice(1, 5);
+    }));
   const results = await (
     await Promise.all(
       eventsGrouped.map(async (i) => ({
@@ -68,15 +68,18 @@ const main = async () => {
         data: await getAdsInsights(i.options),
       }))
     )
-  ).map(({ event, data }) =>
-    event.map((i) =>
-      data.map((d) => ({
-        ...d,
-        apiEventId: i.eventId,
-        apiNonProfit: i.nonProfit,
-      }))
+  )
+    .filter(({ data }) => data.length > 0)
+    .map(({ event, data }) =>
+      event.map((i) =>
+        data.map((d) => ({
+          ...d,
+          apiEventId: i.eventId,
+          apiNonProfit: i.nonProfit,
+        }))
+      )
     )
-  ).flat(2);
+    .flat(2);
   const data = results.filter((i) => !i['err']);
   const err = results.filter((i) => i['err']);
   const [loadErr, loadResults] = await loadMongo(
