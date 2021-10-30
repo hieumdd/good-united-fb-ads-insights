@@ -19,15 +19,17 @@ const main = async (start?: string, end?: string) => {
     .map(({ ids }) => ids)
     .flat()
     .filter((i) => i);
-  const results = await Promise.all(
-    allAdAccounts.map((adAccountId) =>
-      getAdsInsights({
-        adAccountId,
-        start,
-        end,
-      })
+  const results = await (
+    await Promise.all(
+      allAdAccounts.map((adAccountId) =>
+        getAdsInsights({
+          adAccountId,
+          start,
+          end,
+        })
+      )
     )
-  );
+  ).flat(2);
   const err = results.filter((i) => i.hasOwnProperty('err'));
   const data = results.filter((i) => !i.hasOwnProperty('err'));
   const [loadErr, loadResults] = await loadMongo(

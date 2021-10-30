@@ -2,7 +2,7 @@ import { Schema, model } from 'mongoose';
 
 import type { FBAdsRes } from '../types/models';
 
-const COLLECTION = 'FacebookAdsInsightsRaw';
+const COLLECTION = 'FBAds';
 
 const actionBreakdowns = [
   {
@@ -17,8 +17,6 @@ export const schema = new Schema<FBAdsRes>(
     date_stop: { type: Date, required: true },
     account_id: { type: Number, required: true },
     campaign_id: { type: Number, required: true },
-    apiEventId: { type: String, required: true },
-    apiNonProfit: { type: String, required: true },
     account_name: String,
     campaign_name: String,
     account_currency: String,
