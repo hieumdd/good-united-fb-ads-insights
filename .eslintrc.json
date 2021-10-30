@@ -1,19 +1,35 @@
 {
     "env": {
-        "commonjs": true,
-        "es2021": true,
+        "es6": true,
         "node": true
     },
     "extends": [
         "airbnb-base",
+        "airbnb-typescript",
         "prettier"
     ],
+    "parser": "@typescript-eslint/parser",
     "parserOptions": {
-        "ecmaVersion": 12
+        "ecmaVersion": 2018,
+        "sourceType": "module"
     },
+    "plugins": [
+        "@typescript-eslint"
+    ],
     "rules": {
-        "no-console": 0,
-        "no-unused-variable": 0,
-        "dot-notation": 0
+        "no-param-reassign": "off"
+    },
+    "settings": {
+        "import/resolver": {
+            "node": {
+                "extensions": [
+                    ".js",
+                    ".jsx",
+                    ".ts",
+                    ".tsx",
+                    ".d.ts"
+                ]
+            }
+        }
     }
 }
