@@ -2,12 +2,72 @@ require('dotenv').config();
 const { fbAdsSchema } = require('./models/models');
 const { createView } = require('./services/Mongo');
 
+
+
+const unwind = (path) => ({
+  $unwind: {
+    path: `$${path}`,
+    preserveNullAndEmptyArrays: true,
+  },
+});
+
+const facetScalar = ({ path, agg }) => [
+  path,
+  [
+    {
+      $project: {
+        apiEventId: 1,
+        date_start: 1,
+        [`${path}`]: 1,
+      },
+    },
+    {
+      $group: {
+        _id: {
+          apiEventId: '$apiEventId',
+          date_start: '$date_start',
+        },
+        [`${path}`]: {
+          [`$${agg}`]: `$${path}`,
+        },
+      },
+    },
+  ],
+];
+
+const facetArray = ({ path }) => [
+  path,
+  [
+    {
+      $project: {
+        apiEventId: 1,
+        date_start: 1,
+        [`${path}`]: 1,
+      },
+    },
+    { ...unwind(path) },
+    {
+      $group: {
+        _id: {
+          apiEventId: '$apiEventId',
+          date_start: '$date_start',
+          field: `${path}`,
+          action_type: `$${path}.action_type`,
+        },
+        value: {
+          $sum: `$${path}.value`,
+        },
+      },
+    },
+  ],
+];
+
 const aggregationPipelines = (schema) => {
   const nested = Object.entries(schema.tree)
-    .filter(([_, type]) => Array.isArray(type))
-    .map(([path, _]) => ({ path }));
+    .filter(([, type]) => Array.isArray(type))
+    .map(([path, ]) => ({ path }));
   const scalar = Object.entries(fbAdsSchema.tree)
-    .filter(([_, type]) => !Array.isArray(type) & (type.agg !== undefined))
+    .filter(([, type]) => !Array.isArray(type) && (type.agg !== undefined))
     .map(([path, type]) => ({ path, agg: type.agg }));
 
   const facet = {
@@ -115,64 +175,6 @@ const aggregationPipelines = (schema) => {
   ];
   return pipelines;
 };
-
-const unwind = (path) => ({
-  $unwind: {
-    path: `$${path}`,
-    preserveNullAndEmptyArrays: true,
-  },
-});
-
-const facetScalar = ({ path, agg }) => [
-  path,
-  [
-    {
-      $project: {
-        apiEventId: 1,
-        date_start: 1,
-        [`${path}`]: 1,
-      },
-    },
-    {
-      $group: {
-        _id: {
-          apiEventId: '$apiEventId',
-          date_start: '$date_start',
-        },
-        [`${path}`]: {
-          [`$${agg}`]: `$${path}`,
-        },
-      },
-    },
-  ],
-];
-
-const facetArray = ({ path }) => [
-  path,
-  [
-    {
-      $project: {
-        apiEventId: 1,
-        date_start: 1,
-        [`${path}`]: 1,
-      },
-    },
-    { ...unwind(path) },
-    {
-      $group: {
-        _id: {
-          apiEventId: '$apiEventId',
-          date_start: '$date_start',
-          field: `${path}`,
-          action_type: `$${path}.action_type`,
-        },
-        value: {
-          $sum: `$${path}.value`,
-        },
-      },
-    },
-  ],
-];
 
 createView(
   'FacebookAdsAggregated',

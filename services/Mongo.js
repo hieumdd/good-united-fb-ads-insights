@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const { chunk, sumBy } = require('lodash');
 
 const loadMongo = async ({ model, keys, fields }, data) => {
-  const dataChunks = chunk(data, 100);
+  const dataChunks = chunk(data, 200);
   const bulkUpdateOps = dataChunks.map((dataChunk) =>
     dataChunk.map((item) => ({
       updateOne: {
@@ -12,28 +12,24 @@ const loadMongo = async ({ model, keys, fields }, data) => {
       },
     }))
   );
+  console.log('Loading to Mongo');
+  console.time('Loading to Mongo');
   try {
     await mongoose.connect(process.env.MONGO_URI);
-    console.log('Loading to Mongo...');
     const results = await Promise.all(
-      bulkUpdateOps.map(async (op, i) => {
-        console.log(`Loading chunk ${i}`);
+      bulkUpdateOps.map(async (op) => {
         const { deletedCount, insertedCount, modifiedCount, upsertedCount } =
           await model.bulkWrite(op, { w: 0, ordered: false });
-        console.log(`Loaded chunk ${i}`);
-        return {
-          deletedCount,
-          insertedCount,
-          modifiedCount,
-          upsertedCount,
-        };
+        return { deletedCount, insertedCount, modifiedCount, upsertedCount };
       })
     );
+    console.timeEnd('Loading to Mongo');
+    // console.log(results);
     return [
       null,
       Object.fromEntries(
         ['deletedCount', 'insertedCount', 'modifiedCount', 'upsertedCount'].map(
-          (i) => [i, sumBy(results, (j) => j.deletedCount)]
+          (i) => [i, sumBy(results, (j) => j[i])]
         )
       ),
     ];

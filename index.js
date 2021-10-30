@@ -56,11 +56,10 @@ const main = async () => {
     groupBy(eventsWithAdAccount, ({ adAccountId, start, end }) =>
       JSON.stringify({ adAccountId, start, end })
     )
-  )
-    .map(([options, event]) => ({
-      options: JSON.parse(options),
-      event,
-    }));
+  ).map(([options, event]) => ({
+    options: JSON.parse(options),
+    event,
+  }));
   const results = await (
     await Promise.all(
       eventsGrouped.map(async (i) => ({
@@ -88,10 +87,10 @@ const main = async () => {
   );
   if (loadErr) return console.log(loadErr);
   await fs.writeFile('exports/errors.json', JSON.stringify(err, null, 4));
-  return {
-    err,
-    loadResults,
-  };
+  return loadResults;
 };
 
-main().then((run) => console.log(JSON.stringify(run, null, 4)));
+main().then((run) => {
+  console.log(JSON.stringify(run, null, 4));
+  process.exit();
+});
