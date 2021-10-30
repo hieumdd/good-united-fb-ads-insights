@@ -36,8 +36,8 @@ const sendReportRequest = async ({
       ]),
       level: 'campaign',
       time_range: JSON.stringify({
-        since: dayjs(start) > dayjs() ? dayjs().format('YYYY-MM-DD') : start,
-        until: end,
+        since: start || dayjs().subtract(7, 'days').format('YYYY-MM-DD'),
+        until: end || dayjs().format('YYYY-MM-DD'),
       }),
       time_increment: 1,
     });
