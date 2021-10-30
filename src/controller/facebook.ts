@@ -1,7 +1,7 @@
 import axios from 'axios';
 import * as dayjs from 'dayjs';
 
-import { fields } from '../models/models';
+import { fields } from '../models/facebook';
 
 import type { FBAdsOpts, PollReportId, FBAdsErr } from '../types/facebook';
 import type { FBAdsRes } from '../types/models';

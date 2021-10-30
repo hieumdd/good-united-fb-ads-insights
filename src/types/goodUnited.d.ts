@@ -20,3 +20,11 @@ export type AdAccount = {
   adAccount: string;
   ids: string[];
 };
+
+export type EventWithAdAccount = {
+  adAccountId: string;
+  eventId: string;
+  nonProfit: string;
+  start: string;
+  end: string;
+};
