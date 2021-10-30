@@ -75,7 +75,7 @@ const main = async (start?: string, end?: string) => {
       return mappedAdAccount
         ? mappedAdAccount.ids.map((id) => ({
             ...event,
-            adAccountId: id,
+            adAccountId: `act_${id}`,
           }))
         : null!;
     })
@@ -88,4 +88,4 @@ const main = async (start?: string, end?: string) => {
 };
 
 const [start, end] = process.argv.slice(2);
-main(start, end).then((i) => console.log(i));
+main(start, end).then((i) => console.log(JSON.stringify(i, null, 4)));
