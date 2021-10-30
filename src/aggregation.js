@@ -1,18 +1,15 @@
-import * as dotenv from 'dotenv';
-dotenv.config();
+require('dotenv').config();
+const { schema } = require('./models/models');
+const { createView } = require('./services/Mongo');
 
-import { Schema } from 'mongoose';
-import { schema } from './models/models';
-import { createView } from './controller/mongo';
-
-const unwind = (path: string) => ({
+const unwind = (path) => ({
   $unwind: {
     path: `$${path}`,
     preserveNullAndEmptyArrays: true,
   },
 });
 
-const facetScalar = ({ path, agg }: { path: string; agg: string }) => [
+const facetScalar = ({ path, agg }) => [
   path,
   [
     {
@@ -36,7 +33,7 @@ const facetScalar = ({ path, agg }: { path: string; agg: string }) => [
   ],
 ];
 
-const facetArray = ({ path }: { path: string }) => [
+const facetArray = ({ path }) => [
   path,
   [
     {
@@ -63,7 +60,7 @@ const facetArray = ({ path }: { path: string }) => [
   ],
 ];
 
-const aggregationPipelines = (schema: Schema) => {
+const aggregationPipelines = (schema) => {
   const nested = Object.entries(schema.tree)
     .filter(([, type]) => Array.isArray(type))
     .map(([path]) => ({ path }));
@@ -180,5 +177,5 @@ const aggregationPipelines = (schema: Schema) => {
 createView(
   'FacebookAdsAggregated',
   'FacebookAdsInsightsRaw',
-  aggregationPipelines(fbAdsSchema)
+  aggregationPipelines(schema)
 ).then(() => console.log('View Created'));

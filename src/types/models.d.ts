@@ -1,6 +1,6 @@
 type ActionBreakdowns = {
-  action_type: String;
-  value: Number;
+  action_type: string;
+  value: number;
 }[];
 
 export type FBAdsRes = {
@@ -8,15 +8,13 @@ export type FBAdsRes = {
   date_stop: Date;
   account_id: number;
   campaign_id: number;
-  apiEventId: string;
-  apiNonProfit: { type: String; required: true };
-  account_name: String;
-  campaign_name: String;
-  account_currency: String;
+  account_name: string;
+  campaign_name: string;
+  account_currency: string;
   actions: ActionBreakdowns;
   action_values: ActionBreakdowns;
   clicks: number;
-  conversion_rate_ranking: String;
+  conversion_rate_ranking: string;
   conversion_values: ActionBreakdowns;
   conversions: ActionBreakdowns;
   cost_per_action_type: ActionBreakdowns;
@@ -26,14 +24,14 @@ export type FBAdsRes = {
   cpc: number;
   cpm: number;
   ctr: number;
-  engagement_rate_ranking: String;
+  engagement_rate_ranking: string;
   frequency: number;
   impressions: number;
-  inline_link_click_ctr: Number;
+  inline_link_click_ctr: number;
   inline_link_clicks: number;
-  objective: String;
-  optimization_goal: String;
-  quality_ranking: String;
+  objective: string;
+  optimization_goal: string;
+  quality_ranking: string;
   reach: number;
   spend: number;
   unique_actions: ActionBreakdowns;
