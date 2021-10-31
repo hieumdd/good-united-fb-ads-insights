@@ -1,20 +1,25 @@
-require('dotenv').config();
-const { schema } = require('./models/models');
-const { createView } = require('./services/Mongo');
+import * as dotenv from 'dotenv';
+dotenv.config();
 
-const unwind = (path) => ({
+import { Schema } from 'mongoose';
+import { createView } from './controller/mongo';
+import { schema } from './models/facebook';
+
+const dataCol = 'FBAds';
+
+const unwind = (path: string) => ({
   $unwind: {
     path: `$${path}`,
     preserveNullAndEmptyArrays: true,
   },
 });
 
-const facetScalar = ({ path, agg }) => [
+const facetScalar = ({ path, agg }: { path: string; agg: string }) => [
   path,
   [
     {
       $project: {
-        apiEventId: 1,
+        eventId: 1,
         date_start: 1,
         [`${path}`]: 1,
       },
@@ -22,7 +27,7 @@ const facetScalar = ({ path, agg }) => [
     {
       $group: {
         _id: {
-          apiEventId: '$apiEventId',
+          eventId: '$eventId',
           date_start: '$date_start',
         },
         [`${path}`]: {
@@ -33,12 +38,12 @@ const facetScalar = ({ path, agg }) => [
   ],
 ];
 
-const facetArray = ({ path }) => [
+const facetArray = ({ path }: { path: string }) => [
   path,
   [
     {
       $project: {
-        apiEventId: 1,
+        eventId: 1,
         date_start: 1,
         [`${path}`]: 1,
       },
@@ -47,7 +52,7 @@ const facetArray = ({ path }) => [
     {
       $group: {
         _id: {
-          apiEventId: '$apiEventId',
+          eventId: '$eventId',
           date_start: '$date_start',
           field: `${path}`,
           action_type: `$${path}.action_type`,
@@ -60,13 +65,63 @@ const facetArray = ({ path }) => [
   ],
 ];
 
-const aggregationPipelines = (schema) => {
-  const nested = Object.entries(schema.tree)
-    .filter(([, type]) => Array.isArray(type))
+const aggregationPipelines = (schema: Schema) => {
+  const nested = Object.entries(schema.obj)
+    .filter(([, type]: [key: string, type: any]) => Array.isArray(type))
     .map(([path]) => ({ path }));
-  const scalar = Object.entries(fbAdsSchema.tree)
-    .filter(([, type]) => !Array.isArray(type) && type.agg !== undefined)
-    .map(([path, type]) => ({ path, agg: type.agg }));
+  const scalar = Object.entries(schema.obj)
+    .filter(
+      ([, type]: [key: string, type: any]) =>
+        !Array.isArray(type) && type.agg !== undefined
+    )
+    .map(([path, type]: [path: string, type: any]) => ({
+      path,
+      agg: type.agg,
+    }));
+
+  const lookup = {
+    $lookup: {
+      from: dataCol,
+      let: {
+        adAccountId: '$adAccountId',
+        startDate: '$start',
+        endDate: '$end',
+      },
+      pipeline: [
+        {
+          $match: {
+            $expr: {
+              $and: [
+                { $eq: ['$account_id', '$$adAccountId'] },
+                { $gte: ['$date_start', '$$startDate'] },
+                { $lte: ['$date_start', '$$endDate'] },
+              ],
+            },
+          },
+        },
+      ],
+      as: 'adsData',
+    },
+  };
+
+  const unwindAdsData = unwind('adsData');
+
+  const projectAdsData = {
+    $project: {
+      eventId: '$eventId',
+      adAccountId: '$adAccountId',
+      end: '$end',
+      nonProfit: '$nonProfit',
+      start: '$start',
+      date_start: '$adsData.date_start',
+      ...Object.fromEntries(
+        scalar.map(({ path }) => [`${path}`, `$adsData.${path}`])
+      ),
+      ...Object.fromEntries(
+        nested.map(({ path }) => [`${path}`, `$adsData.${path}`])
+      ),
+    },
+  };
 
   const facet = {
     $facet: {
@@ -94,7 +149,7 @@ const aggregationPipelines = (schema) => {
   const groupKV = {
     $group: {
       _id: {
-        apiEventId: '$_id.apiEventId',
+        eventId: '$_id.eventId',
         date_start: '$_id.date_start',
         field: '$_id.field',
       },
@@ -113,7 +168,7 @@ const aggregationPipelines = (schema) => {
   const groupPush = {
     $group: {
       _id: {
-        apiEventId: '$_id.apiEventId',
+        eventId: '$_id.eventId',
         date_start: '$_id.date_start',
       },
       ...Object.fromEntries(
@@ -141,7 +196,7 @@ const aggregationPipelines = (schema) => {
   const projectId = {
     $project: {
       _id: 0,
-      apiEventId: '$_id.apiEventId',
+      eventId: '$_id.eventId',
       date_start: '$_id.date_start',
       ...Object.fromEntries(scalar.map(({ path }) => [`${path}`, 1])),
       ...Object.fromEntries(nested.map(({ path }) => [`${path}`, 1])),
@@ -150,7 +205,7 @@ const aggregationPipelines = (schema) => {
 
   const groupId = {
     $group: {
-      _id: '$apiEventId',
+      _id: '$eventId',
       ads: {
         $push: {
           date_start: '$date_start',
@@ -161,6 +216,9 @@ const aggregationPipelines = (schema) => {
     },
   };
   const pipelines = [
+    lookup,
+    unwindAdsData,
+    projectAdsData,
     facet,
     project,
     fullUnwind,
@@ -174,8 +232,12 @@ const aggregationPipelines = (schema) => {
   return pipelines;
 };
 
-createView(
-  'FacebookAdsAggregated',
-  'FacebookAdsInsightsRaw',
-  aggregationPipelines(schema)
-).then(() => console.log('View Created'));
+createView('FBAdsJoined', 'Events', aggregationPipelines(schema)).then(
+  ([viewErr, view]) => {
+    if (viewErr) {
+      console.log(viewErr);
+    } else {
+      console.log(view, 'View Created');
+    }
+  }
+);
