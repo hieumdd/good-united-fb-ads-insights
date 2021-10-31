@@ -75,7 +75,7 @@ const main = async (start?: string, end?: string) => {
       return mappedAdAccount
         ? mappedAdAccount.ids.map((id) => ({
             ...event,
-            adAccountId: `act_${id}`,
+            adAccountId: Number(id),
           }))
         : null!;
     })
@@ -83,7 +83,7 @@ const main = async (start?: string, end?: string) => {
     .flat();
   return Promise.all([
     handleGoodUnited(eventsWithAdAccount),
-    handleFacebook(adAccounts),
+    handleFacebook(adAccounts, start, end),
   ]);
 };
 

@@ -6,11 +6,11 @@ const COLLECTION = 'Events';
 
 export const schema = new Schema<EventWithAdAccount>(
   {
-    adAccountId: String,
+    adAccountId: Number,
     eventId: { type: String, required: true },
     nonProfit: String,
-    start: String,
-    end: String,
+    start: Date,
+    end: Date,
   },
   { collection: COLLECTION }
 );

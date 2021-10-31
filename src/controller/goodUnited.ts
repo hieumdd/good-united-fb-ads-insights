@@ -41,8 +41,8 @@ export const getEvents = async (): Promise<[unknown | null, Event[] | null]> => 
       data.map((i) => ({
         eventId: i['ID'],
         nonProfit: i['Nonprofit'],
-        start: i['Live Date'],
-        end: i['Start Date'],
+        start: new Date(i['Live Date']),
+        end: new Date(i['Start Date']),
       })),
     ];
   } catch (err) {

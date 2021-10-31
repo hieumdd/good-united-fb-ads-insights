@@ -8,8 +8,8 @@ export type EventAPI = {
 export type Event = {
   eventId: string;
   nonProfit: string;
-  start: string;
-  end: string;
+  start: Date;
+  end: Date;
 };
 
 export type AdAccountAPI<T> = {
@@ -22,9 +22,9 @@ export type AdAccount = {
 };
 
 export type EventWithAdAccount = {
-  adAccountId: string;
+  adAccountId: number;
   eventId: string;
   nonProfit: string;
-  start: string;
-  end: string;
+  start: Date;
+  end: Date;
 };
