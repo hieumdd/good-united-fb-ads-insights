@@ -1,0 +1,28 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch Program",
+            "program": "${workspaceFolder}/src/index.ts",
+            "preLaunchTask": "tsc: build - tsconfig.json",
+            "outFiles": [
+                "${workspaceFolder}/dist/**/*.js"
+            ],
+            "args": ["${input:start}", "${input:end}"]
+        }
+    ],
+    "inputs": [
+        {
+            "id": "start",
+            "type": "promptString",
+            "description": "start"
+        },
+        {
+            "id": "end",
+            "type": "promptString",
+            "description": "end"
+        }
+    ]
+}

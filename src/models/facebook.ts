@@ -1,6 +1,8 @@
-const mongoose = require('mongoose');
+import { Schema, model } from 'mongoose';
 
-const { Schema } = mongoose;
+import type { FBAdsRes } from '../types/models';
+
+const COLLECTION = 'FBAds';
 
 const actionBreakdowns = [
   {
@@ -9,14 +11,12 @@ const actionBreakdowns = [
   },
 ];
 
-const fbAdsSchema = new Schema(
+export const schema = new Schema<FBAdsRes>(
   {
     date_start: { type: Date, required: true },
     date_stop: { type: Date, required: true },
     account_id: { type: Number, required: true },
     campaign_id: { type: Number, required: true },
-    apiEventId: { type: String, required: true },
-    apiNonProfit: { type: String, required: true },
     account_name: String,
     campaign_name: String,
     account_currency: String,
@@ -48,23 +48,13 @@ const fbAdsSchema = new Schema(
     unique_ctr: { type: Number, agg: 'avg' },
     unique_link_clicks_ctr: { type: Number, agg: 'avg' },
   },
-  { collection: 'FacebookAdsInsightsRaw' }
+  { collection: COLLECTION }
 );
 
-const FacebookAdsInsights = mongoose.model(
-  'FacebookAdsInsightsRaw',
-  fbAdsSchema
-);
+export const models = model<FBAdsRes>(COLLECTION, schema);
 
-const keys = Object.entries(fbAdsSchema.obj)
-  .filter(([, type]) => type.required)
-  .map(([name, ]) => name);
+export const keys = Object.entries(schema.obj)
+  .filter(([, type]: [any, any]) => type.required)
+  .map(([name]) => name);
 
-const fields = Object.entries(fbAdsSchema.obj).map(([name, ]) => name);
-
-module.exports = {
-  fbAdsSchema,
-  FacebookAdsInsights,
-  keys,
-  fields,
-};
+export const fields = Object.entries(schema.obj).map(([name]) => name);
