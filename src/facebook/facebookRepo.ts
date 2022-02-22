@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import axios from 'axios';
 import dayjs from 'dayjs';
 
@@ -5,7 +6,7 @@ import { InsightsData, InsightsOptions, PollReportId, InsightsResponse } from '.
 import { models } from './facebookModel';
 import { getFields } from '../db/utils';
 
-const API_VER = 'v12.0';
+const API_VER = 'v13.0';
 
 const axClient = axios.create({
     baseURL: `https://graph.facebook.com/${API_VER}`,

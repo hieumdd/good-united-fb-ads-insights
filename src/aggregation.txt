@@ -10,7 +10,8 @@ const dataCol = 'FBAds';
 const unwind = (path: string) => ({
   $unwind: {
     path: `$${path}`,
-    preserveNullAndEmptyArrays: true,
+    preserveNullAndEmptyArrays: t
+    rue,
   },
 });
 
