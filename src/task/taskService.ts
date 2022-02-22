@@ -4,11 +4,11 @@ type Payload = {
     [key: string]: any;
 };
 
-const PROJECT = '';
-const LOCATION = '';
-const QUEUE = '';
-const URL = '';
-const GCP_SA = '';
+const PROJECT = process.env.PROJECT_ID || '';
+const LOCATION = 'us-central1';
+const QUEUE = 'fb-ads-insights';
+const URL = process.env.PUBLIC_URL || '';
+const GCP_SA = process.env.GCP_SA || '';
 
 const client = new CloudTasksClient();
 

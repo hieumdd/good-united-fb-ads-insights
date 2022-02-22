@@ -36,11 +36,13 @@ jobs:
               if: endsWith(github.ref, '/dev')
               run: |
                   echo "FUNCTION_NAME=good-united-fb-ads-insights-dev" >> $GITHUB_ENV
+                  echo "PUBLIC_URL=https://us-central1-good-united.cloudfunctions.net/god-united-fb-ads-insights-dev" >> $GITHUB_ENV
 
             - name: Set env vars (prod)
               if: endsWith(github.ref, '/master')
               run: |
                   echo "FUNCTION_NAME=good-united-fb-ads-insights" >> $GITHUB_ENV
+                  echo "PUBLIC_URL=https://us-central1-good-united.cloudfunctions.net/god-united-fb-ads-insights" >> $GITHUB_ENV
 
             - name: Deploy
               uses: google-github-actions/deploy-cloud-functions@main
@@ -52,6 +54,8 @@ jobs:
                   credentials: ${{ secrets.GCP_SA_KEY }}
                   service_account_email: ${{ env.GCP_SA }}
                   env-vars: GCP_SA=${{ env.GCP_SA }},\
+                      PROJECT_ID=${{ env.PROJECT_ID }},\
+                      PUBLIC_URL=${{ env.PUBLIC_URL }},\
                       ACCESS_TOKEN=${{ secrets.ACCESS_TOKEN }},\
                       API_KEY=${{ secrets.API_KEY }},\
                       MONGO_URI=${{ secrets.MONGO_URI }},
