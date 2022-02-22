@@ -3,7 +3,7 @@ import { HttpFunction } from '@google-cloud/functions-framework/build/src/functi
 import { pipelineService } from './facebook/facebookService';
 import { eventService, taskService } from './goodUnited/goodUnitedService';
 
-const main: HttpFunction = async (req, res) => {
+export const main: HttpFunction = async (req, res) => {
     const { body } = req;
 
     const result = body.adAccoundId
@@ -12,5 +12,3 @@ const main: HttpFunction = async (req, res) => {
 
     res.send(JSON.stringify(result));
 };
-
-export default main;
