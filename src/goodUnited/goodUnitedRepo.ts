@@ -17,21 +17,31 @@ const client = axios.create({
 });
 
 export const getAdAccounts = async (): Promise<AdAccount[]> => {
-    const { data } = await client.get<AdAccountAPI>('/adAccounts');
-    return Object.entries(data).map(([adAccount, ids]) => ({
-        adAccount,
-        ids: ids.map((i: string) => i.trim()),
-    }));
+    try {
+        const { data } = await client.get<AdAccountAPI>('/adAccounts');
+        return Object.entries(data).map(([adAccount, ids]) => ({
+            adAccount,
+            ids: ids.map((i: string) => i.trim()),
+        }));
+    } catch (err) {
+        console.log(err);
+        return [];
+    }
 };
 
 const getEvents = async (): Promise<Event[]> => {
-    const { data } = await client.get<EventAPI[]>('/events');
-    return data.map((i) => ({
-        eventId: i['ID'],
-        nonProfit: i['Nonprofit'],
-        start: new Date(i['Live Date']),
-        end: new Date(i['Start Date']),
-    }));
+    try {
+        const { data } = await client.get<EventAPI[]>('/events');
+        return data.map((i) => ({
+            eventId: i['ID'],
+            nonProfit: i['Nonprofit'],
+            start: new Date(i['Live Date']),
+            end: new Date(i['Start Date']),
+        }));
+    } catch (err) {
+        console.log(err);
+        return [];
+    }
 };
 
 export const getEventWithAdAccounts = async (): Promise<
