@@ -6,19 +6,26 @@ import { eventService, taskService } from './goodUnited/goodUnitedService';
 export const main: HttpFunction = async (req, res) => {
     const { body } = req;
 
-    console.log(body);
+    console.log('body', body);
 
-    console.log(body?.accountId)
+    console.log('accountId', body?.accountId);
 
     // const result = body?.accountId
     //     ? await pipelineService(body)
     //     : await Promise.all([eventService(), taskService()]);
 
-    const result = await pipelineService(body)
+    // const result = await pipelineService(body);
 
-    const resultJSON = JSON.stringify(result);
+    const result = {
+        a: 1,
+    };
 
-    console.log(resultJSON);
+    let resultJSON;
+    
+    setTimeout(() => {
+        resultJSON = JSON.stringify(result);
+        console.log(resultJSON);
+    }, 30000);
 
     res.send(resultJSON);
 };
