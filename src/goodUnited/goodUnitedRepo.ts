@@ -49,10 +49,10 @@ export const getEventWithAdAccounts = async (): Promise<
             return mappedAdAccount
                 ? mappedAdAccount.ids.map((id) => ({
                       ...event,
-                      adAccountId: parseInt(id),
+                      adAccountId: parseInt(id) || null,
                   }))
                 : undefined;
         })
         .flat()
-        .filter((i) => i) as EventWithAdAccount[];
+        .filter((i) => i?.adAccountId) as EventWithAdAccount[];
 };
