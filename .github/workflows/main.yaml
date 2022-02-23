@@ -1,13 +1,16 @@
 name: CI/CD
+
 on:
   push:
     branches:
       - master
       - dev
   workflow_dispatch:
+
 env:
   PROJECT_ID: good-united
   GCP_SA: etl-325@good-united.iam.gserviceaccount.com
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -44,22 +47,23 @@ jobs:
           echo "FUNCTION_NAME=good-united-fb-ads-insights" >> $GITHUB_ENV
           echo "PUBLIC_URL=https://us-central1-good-united.cloudfunctions.net/good-united-fb-ads-insights" >> $GITHUB_ENV
 
-      - name: Setup Cloud SDK
-        uses: google-github-actions/setup-gcloud@v0.2.0
+      - name: Auth
+        uses: 'google-github-actions/auth@v0'
         with:
-          service_account_key: ${{ secrets.GCP_SA_KEY }}
-          export_default_credentials: true
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
 
-      - name: Deploy to Cloud Functions
-        run: >-
-          gcloud functions deploy ${{ env.FUNCTION_NAME }}
-          --entry-point=main
-          --region=us-central1
-          --timeout=540
-          --project=${{ ENV.PROJECT_ID }}
-          --memory=2048MB
-          --runtime=nodejs16
-          --trigger-http
-          --source=dist
-          --service-account=${{ env.GCP_SA }}
-          --set-env-vars=GCP_SA=${{ env.GCP_SA }},PROJECT_ID=${{ env.PROJECT_ID }},PUBLIC_URL=${{ env.PUBLIC_URL }},ACCESS_TOKEN=${{ secrets.ACCESS_TOKEN }},API_KEY=${{ secrets.API_KEY }},MONGO_URI=${{ secrets.MONGO_URI }}
+      - name: Deploy
+        uses: google-github-actions/deploy-cloud-functions@main
+        with:
+          name: ${{ env.FUNCTION_NAME }}
+          runtime: nodejs16
+          memory_mb: 2048MB,
+          source_dir: dist
+          credentials: ${{ secrets.GCP_SA_KEY }}
+          service_account_email: ${{ env.GCP_SA }}
+          env_vars: GCP_SA=${{ env.GCP_SA }},\
+              PROJECT_ID=${{ env.PROJECT_ID }},\
+              PUBLIC_URL=${{ env.PUBLIC_URL }},\
+              ACCESS_TOKEN=${{ secrets.ACCESS_TOKEN }},\
+              API_KEY=${{ secrets.API_KEY }},\
+              MONGO_URI=${{ secrets.MONGO_URI }}
