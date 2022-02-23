@@ -1,8 +1,5 @@
+import 'dotenv/config';
 import { CloudTasksClient } from '@google-cloud/tasks';
-
-type Payload = {
-    [key: string]: any;
-};
 
 const PROJECT = process.env.PROJECT_ID || '';
 const LOCATION = 'us-central1';
@@ -12,20 +9,25 @@ const GCP_SA = process.env.GCP_SA || '';
 
 const client = new CloudTasksClient();
 
-export const createTasks = async (payloads: Payload[]) => {
+export const createTasks = async <P>(payloads: P[]) => {
     const parent = client.queuePath(PROJECT, LOCATION, QUEUE);
 
-    const tasks: any[] = payloads.map((p) => ({
-        httpRequest: {
-            URL,
-            httpMethod: 'POST',
-            oidcToken: {
-                serviceAccountEmail: GCP_SA,
+    const tasks: any[] = payloads
+        .map((p) => ({
+            httpRequest: {
+                httpMethod: 'POST',
+                url: URL,
+                oidcToken: {
+                    serviceAccountEmail: GCP_SA,
+                },
+                body: Buffer.from(JSON.stringify(p)).toString('base64'),
             },
-            body: Buffer.from(JSON.stringify(p)).toString('base64'),
-        },
-    }));
+        }))
+        .map((task) => ({ parent, task }));
 
-    const requests = tasks.map((task) => ({ parent, task }))
-    return Promise.all(requests.map((r) => client.createTask(r)))
+    const results = (
+        await Promise.all(tasks.map((r) => client.createTask(r)))
+    ).map(([res]) => res);
+
+    return results.length;
 };
