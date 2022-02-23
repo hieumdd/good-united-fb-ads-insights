@@ -57,8 +57,9 @@ jobs:
         with:
           name: ${{ env.FUNCTION_NAME }}
           entry_point: main
+          source_dir: dist
           runtime: nodejs16
           memory_mb: 2048MB,
-          source_dir: dist
+          timeout: 530,
           service_account_email: ${{ env.GCP_SA }}
           env_vars: GCP_SA=${{ env.GCP_SA }},PROJECT_ID=${{ env.PROJECT_ID }},PUBLIC_URL=${{ env.PUBLIC_URL }},ACCESS_TOKEN=${{ secrets.ACCESS_TOKEN }},API_KEY=${{ secrets.API_KEY }},MONGO_URI=${{ secrets.MONGO_URI }}
