@@ -8,7 +8,7 @@ export const main: HttpFunction = async (req, res) => {
 
     console.log(body);
 
-    const result = body.adAccoundId
+    const result = body.accountId
         ? await pipelineService(body)
         : await Promise.all([eventService(), taskService()]);
 
