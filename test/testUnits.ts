@@ -25,4 +25,11 @@ describe('Good United', () => {
         const res = await taskService();
         assert.isAbove(res.result, 0);
     }).timeout(540000);
+
+    it('Controller', async () => {
+        const res = await Promise.all([eventService(), taskService()]);
+        res
+    }).timeout(540000);
+
+
 });
