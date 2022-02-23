@@ -16,6 +16,7 @@ export const createTasks = async <P>(payloads: P[]) => {
         .map((p) => ({
             httpRequest: {
                 httpMethod: 'POST',
+                headers: { 'Content-Type': 'application/json' },
                 url: URL,
                 oidcToken: {
                     serviceAccountEmail: GCP_SA,
