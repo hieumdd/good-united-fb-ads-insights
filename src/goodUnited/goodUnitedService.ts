@@ -16,7 +16,7 @@ export const taskService = async () => {
     const adsAccounts = (await getAdAccounts())
         .map(({ ids }) => ids)
         .reduce((acc, cur) => [...acc, ...cur], [])
-        .filter((i) => i).slice(0, 2);
+        .filter((i) => i);
     return {
         service: 'tasks',
         result: await createTasks<InsightsRequest>(
