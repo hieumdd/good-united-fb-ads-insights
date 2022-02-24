@@ -2,11 +2,7 @@ import 'dotenv/config';
 import axios, { AxiosError } from 'axios';
 import dayjs from 'dayjs';
 
-import {
-    InsightsOptions,
-    PollReportId,
-    InsightsResponse,
-} from './facebook';
+import { InsightsOptions, PollReportId, InsightsResponse } from './facebook';
 import { models } from './facebookModel';
 import { getFields } from '../db/utils';
 
@@ -84,7 +80,7 @@ const getInsights = async (reportId: PollReportId): InsightsResponse => {
         return next ? [...data, ...(await _getInsights(after))] : [...data];
     };
 
-    return  _getInsights();
+    return _getInsights();
 };
 
 const get = async (options: InsightsOptions): InsightsResponse => {
@@ -93,7 +89,7 @@ const get = async (options: InsightsOptions): InsightsResponse => {
         .then((reportId) => getInsights(reportId))
         .catch((err: Error | AxiosError) => {
             if (axios.isAxiosError(err)) {
-                console.log(err.toJSON());
+                console.log(err.response ? err.response.data.error : err.toJSON());
             } else {
                 console.log(err);
             }

@@ -15,7 +15,7 @@ export const main: HttpFunction = async (req, res) => {
         ? await pipelineService(body as InsightsRequest)
         : await Promise.all([eventService(), taskService(body)]);
 
-    console.dir(result);
+    console.log(result);
 
     res.send(result);
 };
