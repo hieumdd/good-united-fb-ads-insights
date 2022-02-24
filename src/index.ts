@@ -11,11 +11,17 @@ export const main: HttpFunction = async (req, res) => {
 
     console.log(body);
 
-    const result = body.accountId
-        ? await pipelineService(body as InsightsRequest)
-        : await Promise.all([eventService(), taskService(body)]);
+    const retryCount = req.get('X-CloudTasks-TaskRetryCount');
 
-    console.log(result);
+    if (retryCount && parseInt(retryCount) >= 3) {
+        res.status(200).send({ ok: true });
+    } else {
+        const result = body.accountId
+            ? await pipelineService(body as InsightsRequest)
+            : await Promise.all([eventService(), taskService(body)]);
 
-    res.send(result);
+        console.log(result);
+
+        res.send(result);
+    }
 };
