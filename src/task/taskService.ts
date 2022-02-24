@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import { CloudTasksClient } from '@google-cloud/tasks';
+import { v4 as uuidv4 } from 'uuid';
 
 const PROJECT = process.env.PROJECT_ID || '';
 const LOCATION = 'us-central1';
@@ -15,7 +16,12 @@ export const createTasks = async <P>(payloads: P[], name: (p: P) => string) => {
     const tasks: any[] = payloads
         .map((p) => ({
             httpRequest: {
-                name: `${parent}/tasks/${name(p)}`,
+                name: client.taskPath(
+                    PROJECT,
+                    LOCATION,
+                    QUEUE,
+                    `${name(p)}-${uuidv4()}`,
+                ),
                 httpMethod: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 url: URL,

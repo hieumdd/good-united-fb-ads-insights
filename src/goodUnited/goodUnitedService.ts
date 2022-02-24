@@ -13,17 +13,17 @@ export const eventService = async () => {
 };
 
 export const taskService = async ({ start, end }: TimeFrame) => {
-    // const adsAccounts = (await getAdAccounts())
-    //     .map(({ ids }) => ids)
-    //     .reduce((acc, cur) => [...acc, ...cur], [])
-    //     .filter((i) => i)
-    //     .map((accountId) => ({ accountId, start, end }));
-    const adsAccounts = [{ accountId: '143175714', start, end }];
+    const adsAccounts = (await getAdAccounts())
+        .map(({ ids }) => ids)
+        .reduce((acc, cur) => [...acc, ...cur], [])
+        .filter((i) => i)
+        .map((accountId) => ({ accountId, start, end }));
+    const result = await createTasks<InsightsRequest>(
+        adsAccounts,
+        ({ accountId }) => accountId,
+    );
     return {
         service: 'tasks',
-        result: await createTasks<InsightsRequest>(
-            adsAccounts,
-            ({ accountId }) => accountId,
-        ),
+        result,
     };
 };
