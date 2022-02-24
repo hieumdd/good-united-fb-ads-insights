@@ -9,12 +9,13 @@ const GCP_SA = process.env.GCP_SA || '';
 
 const client = new CloudTasksClient();
 
-export const createTasks = async <P>(payloads: P[]) => {
+export const createTasks = async <P>(payloads: P[], name: (p: P) => string) => {
     const parent = client.queuePath(PROJECT, LOCATION, QUEUE);
 
     const tasks: any[] = payloads
         .map((p) => ({
             httpRequest: {
+                name: `${parent}/tasks/${name(p)}`,
                 httpMethod: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 url: URL,
@@ -25,8 +26,8 @@ export const createTasks = async <P>(payloads: P[]) => {
             },
         }))
         .map((task) => ({ parent, task }));
-    
-    tasks
+
+    tasks;
 
     const results = (
         await Promise.all(tasks.map((r) => client.createTask(r)))
