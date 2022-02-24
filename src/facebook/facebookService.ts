@@ -19,11 +19,6 @@ export const pipelineService = async ({
             : dayjs().subtract(7, 'days').format(DATE_FORMAT),
         end: end ? dayjs(end).format(DATE_FORMAT) : dayjs().format(DATE_FORMAT),
     });
-    return {
-        service: 'facebook',
-        accountId,
-        start,
-        end,
-        result: await load(model, data),
-    };
+    const result = await load(model, data);
+    return { service: 'facebook', accountId, start, end, result };
 };

@@ -18,7 +18,7 @@ export const taskService = async ({ start, end }: TimeFrame) => {
     //     .reduce((acc, cur) => [...acc, ...cur], [])
     //     .filter((i) => i)
     //     .map((accountId) => ({ accountId, start, end }));
-    const adsAccounts = [{ accountId: '241059363844126', start, end }];
+    const adsAccounts = [{ accountId: '143175714', start, end }];
     return {
         service: 'tasks',
         result: await createTasks<InsightsRequest>(
