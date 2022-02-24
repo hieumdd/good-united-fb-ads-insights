@@ -1,6 +1,6 @@
 import { models } from './goodUnitedModel';
 import { getAdAccounts, getEventWithAdAccounts } from './goodUnitedRepo';
-import { InsightsRequest } from '../facebook/facebook';
+import { TimeFrame, InsightsRequest } from '../facebook/facebook';
 import { load } from '../db/mongo';
 import { createTasks } from '../task/taskService';
 
@@ -12,12 +12,12 @@ export const eventService = async () => {
     };
 };
 
-export const taskService = async () => {
+export const taskService = async ({ start, end }: TimeFrame) => {
     const adsAccounts = (await getAdAccounts())
         .map(({ ids }) => ids)
         .reduce((acc, cur) => [...acc, ...cur], [])
         .filter((i) => i)
-        .map((accountId) => ({ accountId }));
+        .map((accountId) => ({ accountId, start, end }));
     return {
         service: 'tasks',
         result: await createTasks<InsightsRequest>(adsAccounts),

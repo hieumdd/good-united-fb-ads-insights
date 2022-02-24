@@ -1,8 +1,13 @@
-export type InsightsRequest = {
-    accountId: string;
+export type TimeFrame = {
     start?: string;
     end?: string;
-}
+};
+
+type AccountOptions = {
+    accountId: string;
+};
+
+export type InsightsRequest = AccountOptions & TimeFrame;
 
 export type InsightsOptions = Required<InsightsRequest>;
 

@@ -47,6 +47,7 @@ const requestReport = async ({
         });
         return [null, report_run_id];
     } catch (err) {
+        console.error(err);
         return [err, null];
     }
 };
@@ -62,6 +63,7 @@ const pollReport = async (reportId: string): PollReportId => {
         }
         return pollReport(reportId);
     } catch (err) {
+        console.error(err);
         return [err, null];
     }
 };
@@ -97,6 +99,7 @@ const getInsights = async (reportId: string): InsightsResponse => {
     try {
         return [null, await _getInsights()];
     } catch (err) {
+        console.error(err);
         return [err, null];
     }
 };

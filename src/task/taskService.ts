@@ -25,6 +25,8 @@ export const createTasks = async <P>(payloads: P[]) => {
             },
         }))
         .map((task) => ({ parent, task }));
+    
+    tasks
 
     const results = (
         await Promise.all(tasks.map((r) => client.createTask(r)))
