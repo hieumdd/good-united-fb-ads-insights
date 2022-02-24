@@ -12,7 +12,7 @@ export const main: HttpFunction = async (req, res) => {
         ? await pipelineService(body)
         : await Promise.all([eventService(), taskService()]);
 
-    console.log(result);
+    console.log(JSON.stringify(result, null, 4));
 
     res.send(result);
 };
