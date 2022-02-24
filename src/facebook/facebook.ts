@@ -53,8 +53,8 @@ export type InsightsData = {
     unique_link_clicks_ctr: number;
 };
 
-type FacebookResponse<T> = Promise<[unknown | null, T | null]>;
+type FacebookResponse<T> = Promise<T>;
 
-export type PollReportId = FacebookResponse<string>;
+export type PollReportId = string;
 
 export type InsightsResponse = FacebookResponse<InsightsData[]>;
