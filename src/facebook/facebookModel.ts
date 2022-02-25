@@ -1,18 +1,17 @@
 import { Schema, model } from 'mongoose';
 
-import type { FBAdsRes } from '../types/models';
+import { InsightsData } from './facebook';
 
-const COLLECTION = 'FBAds';
+const collection = 'FBAds';
 
 const actionBreakdowns = [
-  {
-    action_type: String,
-    value: Number,
-  },
+    {
+        action_type: String,
+        value: Number,
+    },
 ];
 
-export const schema = new Schema<FBAdsRes>(
-  {
+const schemaObj = {
     date_start: { type: Date, required: true },
     date_stop: { type: Date, required: true },
     account_id: { type: Number, required: true },
@@ -47,14 +46,11 @@ export const schema = new Schema<FBAdsRes>(
     unique_clicks: { type: Number, agg: 'sum' },
     unique_ctr: { type: Number, agg: 'avg' },
     unique_link_clicks_ctr: { type: Number, agg: 'avg' },
-  },
-  { collection: COLLECTION }
+};
+
+export const models = model<InsightsData>(
+    collection,
+    new Schema<InsightsData>(schemaObj, {
+        collection,
+    }),
 );
-
-export const models = model<FBAdsRes>(COLLECTION, schema);
-
-export const keys = Object.entries(schema.obj)
-  .filter(([, type]: [any, any]) => type.required)
-  .map(([name]) => name);
-
-export const fields = Object.entries(schema.obj).map(([name]) => name);

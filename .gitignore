@@ -119,3 +119,5 @@ dist
 exports/*
 !exports/.gitkeep
 .DS_Store
+
+good-united-36d9139277cc.json
