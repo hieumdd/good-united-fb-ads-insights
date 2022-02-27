@@ -15,13 +15,13 @@ export const createTasks = async <P>(payloads: P[], name: (p: P) => string) => {
 
     const tasks: any[] = payloads
         .map((p) => ({
+            name: client.taskPath(
+                PROJECT,
+                LOCATION,
+                QUEUE,
+                `${name(p)}-${uuidv4()}`,
+            ),
             httpRequest: {
-                name: client.taskPath(
-                    PROJECT,
-                    LOCATION,
-                    QUEUE,
-                    `${name(p)}-${uuidv4()}`,
-                ),
                 httpMethod: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 url: URL,
