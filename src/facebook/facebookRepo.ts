@@ -24,27 +24,34 @@ const requestReport = async ({
     accountId,
     start,
     end,
-}: InsightsOptions): Promise<PollReportId> => {
-    const {
-        data: { report_run_id },
-    } = await axClient.post(`/act_${accountId}/insights`, {
-        fields: getFields(models),
-        filter: JSON.stringify([
-            { field: 'ad.impressions', operator: 'GREATER_THAN', value: 0 },
-            {
-                field: 'campaign.name',
-                operator: 'CONTAIN',
-                value: `LEADS`,
-            },
-        ]),
-        level: 'campaign',
-        time_range: JSON.stringify({
-            since: dayjs(start).format('YYYY-MM-DD'),
-            until: dayjs(end).format('YYYY-MM-DD'),
-        }),
-        time_increment: 1,
-    });
-    return report_run_id;
+}: InsightsOptions): Promise<[unknown | null, PollReportId | null]> => {
+    try {
+        const {
+            data: { report_run_id },
+        } = await axClient.post(`/act_${accountId}/insights`, {
+            fields: getFields(models),
+            filter: JSON.stringify([
+                { field: 'ad.impressions', operator: 'GREATER_THAN', value: 0 },
+                {
+                    field: 'campaign.name',
+                    operator: 'CONTAIN',
+                    value: `LEADS`,
+                },
+            ]),
+            level: 'campaign',
+            time_range: JSON.stringify({
+                since: dayjs(start).format('YYYY-MM-DD'),
+                until: dayjs(end).format('YYYY-MM-DD'),
+            }),
+            time_increment: 1,
+        });
+        return [null, report_run_id];
+    } catch (err) {
+        if (err && axios.isAxiosError(err)) {
+            console.log(err.response?.data);
+        }
+        return [err, null];
+    }
 };
 
 const pollReport = async (reportId: PollReportId): Promise<PollReportId> => {
@@ -84,12 +91,17 @@ const getInsights = async (reportId: PollReportId): InsightsResponse => {
 };
 
 const get = async (options: InsightsOptions): InsightsResponse => {
-    return requestReport(options)
-        .then((reportId) => pollReport(reportId))
+    const [errReportId, reportId] = await requestReport(options);
+
+    if (errReportId || !reportId) return [];
+    
+    return pollReport(reportId)
         .then((reportId) => getInsights(reportId))
         .catch((err: Error | AxiosError) => {
             if (axios.isAxiosError(err)) {
-                console.log(err.response ? err.response.data.error : err.toJSON());
+                console.log(
+                    err.response ? err.response.data.error : err.toJSON(),
+                );
             } else {
                 console.log(err);
             }

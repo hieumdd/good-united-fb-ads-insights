@@ -23,5 +23,6 @@ export const main: HttpFunction = async (req, res) => {
         console.log(result);
 
         res.status(200).send(result);
+        return
     }
 };

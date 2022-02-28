@@ -15,13 +15,13 @@ export const createTasks = async <P>(payloads: P[], name: (p: P) => string) => {
 
     const tasks: any[] = payloads
         .map((p) => ({
+            name: client.taskPath(
+                PROJECT,
+                LOCATION,
+                QUEUE,
+                `${name(p)}-${uuidv4()}`,
+            ),
             httpRequest: {
-                name: client.taskPath(
-                    PROJECT,
-                    LOCATION,
-                    QUEUE,
-                    `${name(p)}-${uuidv4()}`,
-                ),
                 httpMethod: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 url: URL,
@@ -33,11 +33,9 @@ export const createTasks = async <P>(payloads: P[], name: (p: P) => string) => {
         }))
         .map((task) => ({ parent, task }));
 
-    tasks;
-
-    const results = (
-        await Promise.all(tasks.map((r) => client.createTask(r)))
-    ).map(([res]) => res);
+    const requests = await Promise.all(tasks.map((r) => client.createTask(r)));
+    await client.close();
+    const results = requests.map(([res]) => res.name);
 
     return results.length;
 };

@@ -28,7 +28,7 @@ describe('Good United', () => {
     }).timeout(540000);
 
     it('Task Service', async () => {
-        const res = await taskService(timeFrame);
+        const res = await taskService(defaultTimeFrame);
         assert.isAbove(res.result, 0);
     }).timeout(540000);
 
