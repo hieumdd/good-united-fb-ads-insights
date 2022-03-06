@@ -57,6 +57,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Download ${{ env.ENV_FILE }}
+        uses: actions/download-artifact@v2
+        with:
+          name: ${{ env.ENV_KEY }}
+
       - name: Setup node.js
         uses: actions/setup-node@v2
         with:
