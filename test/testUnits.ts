@@ -1,18 +1,18 @@
-import { assert } from 'chai';
-
 import { pipelineService } from '../src/facebook/facebookService';
 import { eventService, taskService } from '../src/goodUnited/goodUnitedService';
+
+jest.setTimeout(100000000);
 
 describe('Facebook', () => {
     it('Pipeline Service', async () => {
         const options = {
-            accountId: '701463723810577',
+            accountId: '1727886630625085',
             start: '2021-12-01',
-        end: '2022-01-01',
+            end: '2022-01-01',
         };
         const res = await pipelineService(options);
-        assert.isAbove(res.result.modifiedCount, 0);
-    }).timeout(540000);
+        expect(res.result.modifiedCount).toBeGreaterThan(0);
+    });
 });
 
 describe('Good United', () => {
@@ -24,13 +24,13 @@ describe('Good United', () => {
 
     it('Event Service', async () => {
         const res = await eventService();
-        assert.isAbove(res.result.modifiedCount, 0);
-    }).timeout(540000);
+        expect(res.result.modifiedCount).toBeGreaterThan(0);
+    });
 
     it('Task Service', async () => {
         const res = await taskService(defaultTimeFrame);
-        assert.isAbove(res.result, 0);
-    }).timeout(540000);
+        expect(res.result).toBeGreaterThan(0);
+    });
 
     it('Controller', async () => {
         const res = await Promise.all([
@@ -38,5 +38,5 @@ describe('Good United', () => {
             taskService(defaultTimeFrame),
         ]);
         res;
-    }).timeout(540000);
+    });
 });
