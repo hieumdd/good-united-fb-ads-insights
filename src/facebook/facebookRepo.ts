@@ -22,11 +22,9 @@ const getClient = () =>
 const requestReport = async (
     client: Axios,
     { accountId, start, end }: InsightsOptions,
-): Promise<[unknown | null, PollReportId | null]> => {
-    try {
-        const {
-            data: { report_run_id },
-        } = await client.post(`/act_${accountId}/insights`, {
+): Promise<PollReportId | undefined> => {
+    return client
+        .post(`/act_${accountId}/insights`, {
             fields: getFields(models),
             filter: JSON.stringify([
                 { field: 'ad.impressions', operator: 'GREATER_THAN', value: 0 },
@@ -42,14 +40,12 @@ const requestReport = async (
                 until: dayjs(end).format('YYYY-MM-DD'),
             }),
             time_increment: 1,
+        })
+        .then(({ data }) => data.report_run_id)
+        .catch((err) => {
+            err && axios.isAxiosError(err) && console.log(err.response?.data);
+            return undefined;
         });
-        return [null, report_run_id];
-    } catch (err) {
-        if (err && axios.isAxiosError(err)) {
-            console.log(err.response?.data);
-        }
-        return [err, null];
-    }
 };
 
 const pollReport = async (
@@ -96,22 +92,22 @@ const getInsights = async (
 
 const get = async (options: InsightsOptions): InsightsResponse => {
     const client = await getClient();
-    const [errReportId, reportId] = await requestReport(client, options);
+    const reportId = await requestReport(client, options);
 
-    if (errReportId || !reportId) return [];
-
-    return pollReport(client, reportId)
-        .then((reportId) => getInsights(client, reportId))
-        .catch((err: Error | AxiosError) => {
-            if (axios.isAxiosError(err)) {
-                console.log(
-                    err.response ? err.response.data.error : err.toJSON(),
-                );
-            } else {
-                console.log(err);
-            }
-            throw err;
-        });
+    return reportId
+        ? pollReport(client, reportId)
+              .then((reportId) => getInsights(client, reportId))
+              .catch((err: Error | AxiosError) => {
+                  if (axios.isAxiosError(err)) {
+                      console.log(
+                          err.response ? err.response.data.error : err.toJSON(),
+                      );
+                  } else {
+                      console.log(err);
+                  }
+                  throw err;
+              })
+        : [];
 };
 
 export default get;
