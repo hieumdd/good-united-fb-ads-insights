@@ -1,4 +1,3 @@
-import 'dotenv/config';
 import axios, { Axios, AxiosError } from 'axios';
 import dayjs from 'dayjs';
 
@@ -22,8 +21,8 @@ const getClient = () =>
 const requestReport = async (
     client: Axios,
     { accountId, start, end }: InsightsOptions,
-): Promise<PollReportId | undefined> => {
-    return client
+): Promise<PollReportId | undefined> =>
+    client
         .post(`/act_${accountId}/insights`, {
             fields: getFields(models),
             filter: JSON.stringify([
@@ -41,25 +40,17 @@ const requestReport = async (
             }),
             time_increment: 1,
         })
-        .then(({ data }) => data.report_run_id)
-        .catch((err) => {
-            err && axios.isAxiosError(err) && console.log(err.response?.data);
-            return undefined;
-        });
-};
+        .then(({ data }) => data.report_run_id);
 
 const pollReport = async (
     client: Axios,
     reportId: PollReportId,
 ): Promise<PollReportId> => {
     const { data } = await client.get(`/${reportId}`);
-    if (
-        data.async_percent_completion === 100 &&
+    return data.async_percent_completion === 100 &&
         data.async_status === 'Job Completed'
-    ) {
-        return reportId;
-    }
-    return pollReport(client, reportId);
+        ? reportId
+        : pollReport(client, reportId);
 };
 
 const getInsights = async (
