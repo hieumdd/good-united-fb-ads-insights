@@ -39,7 +39,7 @@ jobs:
 
       - name: Create ${{ env.ENV_KEY }}
         run: |
-          echo "ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}" >> ${{ env.ENV_FILE }}
+          echo "DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}" >> ${{ env.ENV_FILE }}
           echo "API_KEY: ${{ secrets.API_KEY }}" >> ${{ env.ENV_FILE }}
           echo "MONGO_URI: ${{ secrets.MONGO_URI }}" >> ${{ env.ENV_FILE }}
           echo "GCP_SA: ${{ env.GCP_SA }}" >> ${{ env.ENV_FILE }}

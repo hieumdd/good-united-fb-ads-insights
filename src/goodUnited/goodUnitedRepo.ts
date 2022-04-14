@@ -1,4 +1,3 @@
-import 'dotenv/config';
 import axios from 'axios';
 
 import {
@@ -16,33 +15,35 @@ const client = axios.create({
     },
 });
 
-export const getAdAccounts = async (): Promise<AdAccount[]> => {
-    try {
-        const { data } = await client.get<AdAccountAPI>('/adAccounts');
-        return Object.entries(data).map(([adAccount, ids]) => ({
-            adAccount,
-            ids: ids.map((i: string) => i.trim()),
-        }));
-    } catch (err) {
-        console.log(err);
-        return [];
-    }
-};
+export const getAdAccounts = async (): Promise<AdAccount[]> =>
+    client
+        .get<AdAccountAPI>('/adAccounts')
+        .then(({ data }) =>
+            Object.entries(data).map(([adAccount, ids]) => ({
+                adAccount,
+                ids: ids.map((i: string) => i.trim()),
+            })),
+        )
+        .catch((err) => {
+            console.log(err);
+            return [];
+        });
 
-const getEvents = async (): Promise<Event[]> => {
-    try {
-        const { data } = await client.get<EventAPI[]>('/events');
-        return data.map((i) => ({
-            eventId: i['ID'],
-            nonProfit: i['Nonprofit'],
-            start: new Date(i['Live Date']),
-            end: new Date(i['Start Date']),
-        }));
-    } catch (err) {
-        console.log(err);
-        return [];
-    }
-};
+const getEvents = async (): Promise<Event[]> =>
+    client
+        .get<EventAPI[]>('/events')
+        .then(({ data }) =>
+            data.map((i) => ({
+                eventId: i['ID'],
+                nonProfit: i['Nonprofit'],
+                start: new Date(i['Live Date']),
+                end: new Date(i['Start Date']),
+            })),
+        )
+        .catch((err) => {
+            console.log(err);
+            return [];
+        });
 
 export const getEventWithAdAccounts = async (): Promise<
     EventWithAdAccount[]

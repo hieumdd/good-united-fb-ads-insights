@@ -1,34 +1,29 @@
-import 'dotenv/config';
-import axios, { AxiosError } from 'axios';
+import axios, { Axios, AxiosError } from 'axios';
 import dayjs from 'dayjs';
 
 import { InsightsOptions, PollReportId, InsightsResponse } from './facebook';
 import { models } from './facebookModel';
 import { getFields } from '../db/utils';
+import { getAccessToken } from '../secret_manager/doppler';
 
 const API_VER = 'v13.0';
 
-const axClient = axios.create({
-    baseURL: `https://graph.facebook.com/${API_VER}`,
-});
+const getClient = () =>
+    getAccessToken().then((access_token) =>
+        axios.create({
+            baseURL: `https://graph.facebook.com/${API_VER}`,
+            params: {
+                access_token,
+            },
+        }),
+    );
 
-axClient.interceptors.request.use((config) => ({
-    ...config,
-    params: {
-        ...config.params,
-        access_token: process.env.ACCESS_TOKEN,
-    },
-}));
-
-const requestReport = async ({
-    accountId,
-    start,
-    end,
-}: InsightsOptions): Promise<[unknown | null, PollReportId | null]> => {
-    try {
-        const {
-            data: { report_run_id },
-        } = await axClient.post(`/act_${accountId}/insights`, {
+const requestReport = async (
+    client: Axios,
+    { accountId, start, end }: InsightsOptions,
+): Promise<PollReportId | undefined> =>
+    client
+        .post(`/act_${accountId}/insights`, {
             fields: getFields(models),
             filter: JSON.stringify([
                 { field: 'ad.impressions', operator: 'GREATER_THAN', value: 0 },
@@ -44,28 +39,24 @@ const requestReport = async ({
                 until: dayjs(end).format('YYYY-MM-DD'),
             }),
             time_increment: 1,
-        });
-        return [null, report_run_id];
-    } catch (err) {
-        if (err && axios.isAxiosError(err)) {
-            console.log(err.response?.data);
-        }
-        return [err, null];
-    }
-};
+        })
+        .then(({ data }) => data.report_run_id);
 
-const pollReport = async (reportId: PollReportId): Promise<PollReportId> => {
-    const { data } = await axClient.get(`/${reportId}`);
-    if (
-        data.async_percent_completion === 100 &&
+const pollReport = async (
+    client: Axios,
+    reportId: PollReportId,
+): Promise<PollReportId> => {
+    const { data } = await client.get(`/${reportId}`);
+    return data.async_percent_completion === 100 &&
         data.async_status === 'Job Completed'
-    ) {
-        return reportId;
-    }
-    return pollReport(reportId);
+        ? reportId
+        : pollReport(client, reportId);
 };
 
-const getInsights = async (reportId: PollReportId): InsightsResponse => {
+const getInsights = async (
+    client: Axios,
+    reportId: PollReportId,
+): InsightsResponse => {
     const defaultParams = {
         limit: 500,
     };
@@ -81,7 +72,7 @@ const getInsights = async (reportId: PollReportId): InsightsResponse => {
                     next,
                 },
             },
-        } = await axClient.get(`/${reportId}/insights`, {
+        } = await client.get(`/${reportId}/insights`, {
             params,
         });
         return next ? [...data, ...(await _getInsights(after))] : [...data];
@@ -91,22 +82,23 @@ const getInsights = async (reportId: PollReportId): InsightsResponse => {
 };
 
 const get = async (options: InsightsOptions): InsightsResponse => {
-    const [errReportId, reportId] = await requestReport(options);
+    const client = await getClient();
+    const reportId = await requestReport(client, options);
 
-    if (errReportId || !reportId) return [];
-    
-    return pollReport(reportId)
-        .then((reportId) => getInsights(reportId))
-        .catch((err: Error | AxiosError) => {
-            if (axios.isAxiosError(err)) {
-                console.log(
-                    err.response ? err.response.data.error : err.toJSON(),
-                );
-            } else {
-                console.log(err);
-            }
-            throw err;
-        });
+    return reportId
+        ? pollReport(client, reportId)
+              .then((reportId) => getInsights(client, reportId))
+              .catch((err: Error | AxiosError) => {
+                  if (axios.isAxiosError(err)) {
+                      console.log(
+                          err.response ? err.response.data.error : err.toJSON(),
+                      );
+                  } else {
+                      console.log(err);
+                  }
+                  throw err;
+              })
+        : [];
 };
 
 export default get;

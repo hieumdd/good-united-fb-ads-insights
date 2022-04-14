@@ -1,4 +1,3 @@
-import 'dotenv/config';
 import { CloudTasksClient } from '@google-cloud/tasks';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -8,9 +7,9 @@ const QUEUE = 'fb-ads-insights';
 const URL = process.env.PUBLIC_URL || '';
 const GCP_SA = process.env.GCP_SA || '';
 
-const client = new CloudTasksClient();
-
 export const createTasks = async <P>(payloads: P[], name: (p: P) => string) => {
+    const client = new CloudTasksClient();
+
     const parent = client.queuePath(PROJECT, LOCATION, QUEUE);
 
     const tasks: any[] = payloads
