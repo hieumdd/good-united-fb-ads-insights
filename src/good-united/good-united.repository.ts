@@ -1,13 +1,5 @@
 import axios from 'axios';
 
-import {
-    AdAccountAPI,
-    AdAccount,
-    EventAPI,
-    Event,
-    EventWithAdAccount,
-} from './goodUnited';
-
 const client = axios.create({
     baseURL: 'https://abc.1gu.xyz',
     headers: {
@@ -15,23 +7,45 @@ const client = axios.create({
     },
 });
 
+type AdAccount = {
+    adAccount: string;
+    ids: string[];
+};
+
 export const getAdAccounts = async (): Promise<AdAccount[]> =>
     client
-        .get<AdAccountAPI>('/adAccounts')
+        .request<{ [key: string]: string[] }>({
+            method: 'GET',
+            url: '/adAccounts',
+        })
         .then(({ data }) =>
             Object.entries(data).map(([adAccount, ids]) => ({
                 adAccount,
-                ids: ids.map((i: string) => i.trim()),
+                ids: ids.map((i) => i.trim()),
             })),
         )
         .catch((err) => {
-            console.log(err);
+            axios.isAxiosError(err) && console.log(err.response?.data);
             return [];
         });
 
+type EventResponse = {
+    ID: string;
+    Nonprofit: string;
+    'Live Date': string;
+    'Start Date': string;
+};
+
+type Event = {
+    eventId: string;
+    nonProfit: string;
+    start: Date;
+    end: Date;
+};
+
 const getEvents = async (): Promise<Event[]> =>
     client
-        .get<EventAPI[]>('/events')
+        .request<EventResponse[]>({ method: 'GET', url: '/events' })
         .then(({ data }) =>
             data.map((i) => ({
                 eventId: i['ID'],
@@ -41,9 +55,17 @@ const getEvents = async (): Promise<Event[]> =>
             })),
         )
         .catch((err) => {
-            console.log(err);
+            axios.isAxiosError(err) && console.log(err.response?.data);
             return [];
         });
+
+export type EventWithAdAccount = {
+    adAccountId: string;
+    eventId: string;
+    nonProfit: string;
+    start: Date;
+    end: Date;
+};
 
 export const getEventWithAdAccounts = async (): Promise<
     EventWithAdAccount[]
@@ -52,18 +74,19 @@ export const getEventWithAdAccounts = async (): Promise<
         getEvents(),
         getAdAccounts(),
     ]);
+
     return events
-        .map((event) => {
+        .flatMap((event) => {
             const mappedAdAccount = adAccounts.find(
                 ({ adAccount }) => adAccount === event.nonProfit,
             );
+
             return mappedAdAccount
-                ? mappedAdAccount.ids.map((id) => ({
+                ? mappedAdAccount.ids.map((adAccountId) => ({
                       ...event,
-                      adAccountId: parseInt(id) || null,
+                      adAccountId,
                   }))
                 : undefined;
         })
-        .flat()
         .filter((i) => i?.adAccountId) as EventWithAdAccount[];
 };

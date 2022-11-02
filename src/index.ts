@@ -1,8 +1,11 @@
 import { HttpFunction } from '@google-cloud/functions-framework/build/src/functions';
 
 import { InsightsRequest } from './facebook/facebook';
-import { pipelineService } from './facebook/facebookService';
-import { eventService, taskService } from './goodUnited/goodUnitedService';
+import { pipelineService } from './facebook/facebook.service';
+import {
+    eventPipelineService,
+    taskService,
+} from './good-united/good-united.service';
 
 type Body = Partial<InsightsRequest>;
 
@@ -18,11 +21,11 @@ export const main: HttpFunction = async (req, res) => {
     } else {
         const result = body.accountId
             ? await pipelineService(body as InsightsRequest)
-            : await Promise.all([eventService(), taskService(body)]);
+            : await Promise.all([eventPipelineService(), taskService(body)]);
 
         console.log(result);
 
         res.status(200).send(result);
-        return
+        return;
     }
 };
