@@ -8,17 +8,23 @@ describe('Facebook', () => {
         const options = {
             accountId: '1727886630625085',
             start: '2021-12-01',
-            end: '2022-01-01',
+            end: '2021-12-05',
         };
-        const res = await pipelineService(options);
-        expect(res.result.modifiedCount).toBeGreaterThan(0);
+        return pipelineService(options)
+            .then(({ result }) =>
+                expect(result.modifiedCount).toBeGreaterThan(0),
+            )
+            .catch((err) => {
+                console.log(err);
+                throw err
+            });
     });
 });
 
 describe('Good United', () => {
     const timeFrame = {
-        start: '2021-12-01',
-        end: '2022-01-01',
+        // start: '2022-08-10',
+        // end: '2022-08-15',
     };
     const defaultTimeFrame = {};
 
@@ -28,7 +34,7 @@ describe('Good United', () => {
     });
 
     it('Task Service', async () => {
-        const res = await taskService(defaultTimeFrame);
+        const res = await taskService(timeFrame);
         expect(res.result).toBeGreaterThan(0);
     });
 
