@@ -6,7 +6,7 @@ import { models } from './facebookModel';
 import { getFields } from '../db/utils';
 import { getAccessToken } from '../secret_manager/doppler';
 
-const API_VER = 'v13.0';
+const API_VER = 'v15.0';
 
 const getClient = () =>
     getAccessToken().then((access_token) =>
