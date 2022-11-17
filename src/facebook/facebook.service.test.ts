@@ -1,9 +1,5 @@
 import { pipelineService } from './facebook.service';
-import {
-    Pipeline,
-    CampaignInsights,
-    AgeGenderInsights,
-} from './pipeline.const';
+import { Pipeline, CampaignInsights, AgeGenderInsights } from './pipeline.const';
 
 const cases = [
     // [CampaignInsights.collection, CampaignInsights],
@@ -13,13 +9,9 @@ const cases = [
 describe('Facebook Service', () => {
     it.each(cases)('Pipeline Service %p', async (_, pipeline) => {
         const options = {
-            accountId: '1727886630625085',
-            start: '2021-12-01',
-            end: '2021-12-05',
+            accountId: '137172389777147',
         };
 
-        return pipelineService(options, pipeline).then((res) =>
-            expect(res).toBeTruthy(),
-        );
+        return pipelineService(options, pipeline).then((res) => expect(res).toBeTruthy());
     });
 });

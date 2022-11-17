@@ -20,6 +20,8 @@ export const createTasks = async <P>(
 
     const parent = client.queuePath(PROJECT, LOCATION, QUEUE);
 
+    const x = payloads.filter((z: any) => z.accountId === '40405605')
+
     const tasks = payloads
         .map((p) => ({
             name: client.taskPath(
@@ -36,7 +38,7 @@ export const createTasks = async <P>(
                 body: Buffer.from(JSON.stringify(p)).toString('base64'),
             },
         }))
-        .map((task) => ({ parent, task })).slice(0, 2);
+        .map((task) => ({ parent, task }));
 
     const requests = await Promise.all(tasks.map((r) => client.createTask(r)));
 

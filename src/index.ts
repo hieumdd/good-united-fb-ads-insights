@@ -6,7 +6,7 @@ import { eventService, taskService } from './good-united/good-united.service';
 
 type Body = {
     pipeline: keyof typeof pipelines;
-    accountId: string;
+    accountId?: string;
     start?: string;
     end?: string;
 };
@@ -20,24 +20,20 @@ export const main: HttpFunction = async (req, res) => {
 
     if (retryCount && parseInt(retryCount) >= 3) {
         res.status(200).send({ ok: true });
-
-        return;
+    } else if (body.accountId && body.pipeline) {
+        pipelineService(
+            {
+                accountId: body.accountId,
+                start: body.start,
+                end: body.end,
+            },
+            pipelines[body.pipeline],
+        ).then((result) => res.status(200).json({ result }));
+    } else if (!body.accountId && body.pipeline) {
+        await Promise.all([eventService(), taskService(body)]).then((result) =>
+            res.status(200).json({ result }),
+        );
     } else {
-        const result = body.accountId
-            ? await pipelineService(
-                  {
-                      accountId: body.accountId,
-                      start: body.start,
-                      end: body.end,
-                  },
-                  pipelines[body.pipeline],
-              )
-            : await Promise.all([eventService(), taskService(body)]);
-
-        console.log('result', JSON.stringify(result));
-
-        res.status(200).json({ result });
-
-        return;
+        res.status(400).json({ error: 'error' });
     }
 };
