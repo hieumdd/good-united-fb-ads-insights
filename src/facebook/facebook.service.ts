@@ -22,6 +22,6 @@ export const pipelineService = async (options: PipelineOptions, pipeline: Pipeli
         end,
         ...pipeline,
     })
-        .then((data) => data.map(pipeline.transformFn))
+        .then((rows) => rows.map((row) => pipeline.schema.validate(row, { abortEarly: false }).value))
         .then((data) => load(data, { collection: pipeline.collection, keys: pipeline.keys }));
 };
