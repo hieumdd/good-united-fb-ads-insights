@@ -7,10 +7,16 @@ const LOCATION = 'us-central1';
 const QUEUE = 'fb-ads-insights';
 
 const URL = process.env.PUBLIC_URL || '';
-const GCP_SA = process.env.GCP_SA || '';
 
-export const createTasks = async <P>(payloads: P[], nameFn: (p: P) => string) => {
+export const createTasks = async <P>(
+    payloads: P[],
+    nameFn: (p: P) => string,
+) => {
     const client = new CloudTasksClient();
+
+    const serviceAccountEmail = await client.auth
+        .getCredentials()
+        .then((credentials) => credentials.client_email);
 
     const parent = client.queuePath(PROJECT, LOCATION, QUEUE);
 
@@ -26,7 +32,7 @@ export const createTasks = async <P>(payloads: P[], nameFn: (p: P) => string) =>
                 httpMethod: HttpMethod.POST,
                 headers: { 'Content-Type': 'application/json' },
                 url: URL,
-                oidcToken: { serviceAccountEmail: GCP_SA },
+                oidcToken: { serviceAccountEmail },
                 body: Buffer.from(JSON.stringify(p)).toString('base64'),
             },
         }))

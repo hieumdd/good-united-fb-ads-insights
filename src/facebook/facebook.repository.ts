@@ -3,10 +3,14 @@ import { Dayjs } from 'dayjs';
 
 import { getSecret } from '../secret-manager/doppler.service';
 
-type InsightsOptions = {
-    accountId: string;
+export type InsightsOptions = {
     level: string;
     fields: string[];
+    breakdowns?: string;
+};
+
+export type ReportOptions = {
+    accountId: string;
     start: Dayjs;
     end: Dayjs;
 };
@@ -38,17 +42,20 @@ const getClient = async () => {
     );
 };
 
-export const get = async (options: InsightsOptions): Promise<InsightsData> => {
+export const get = async (
+    options: InsightsOptions & ReportOptions,
+): Promise<InsightsData> => {
     const client = await getClient();
 
-    const requestReport = async (): Promise<string> =>
-        client
+    const requestReport = async (): Promise<string> => {
+        return client
             .request<RequestReportResponse>({
                 method: 'POST',
                 url: `/act_${options.accountId}/insights`,
                 data: {
                     level: options.level,
                     fields: options.fields,
+                    breakdowns: options.breakdowns,
                     filter: [
                         {
                             field: 'ad.impressions',
@@ -69,6 +76,7 @@ export const get = async (options: InsightsOptions): Promise<InsightsData> => {
                 },
             })
             .then(({ data }) => data.report_run_id);
+    };
 
     const pollReport = async (reportId: string): Promise<string> => {
         const data = await client
@@ -90,7 +98,7 @@ export const get = async (options: InsightsOptions): Promise<InsightsData> => {
                 .request<InsightsResponse>({
                     method: 'GET',
                     url: `/${reportId}/insights`,
-                    params: { after },
+                    params: { after, limit: 500 },
                 })
                 .then((res) => res.data);
 
@@ -101,8 +109,6 @@ export const get = async (options: InsightsOptions): Promise<InsightsData> => {
                   ]
                 : data.data;
         };
-
-        client.defaults.params = { limit: 500 };
 
         return _getInsights();
     };

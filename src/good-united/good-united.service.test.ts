@@ -1,7 +1,7 @@
-import { eventPipelineService, taskService } from './good-united.service';
+import { eventService, taskService } from './good-united.service';
 
 it('Event Service', async () => {
-    return eventPipelineService().then((res) => expect(res).toBeTruthy());
+    return eventService().then((res) => expect(res).toBeTruthy());
 });
 
 const timeFrame = {
@@ -14,7 +14,7 @@ it('Task Service', async () => {
 });
 
 it('Controller', async () => {
-    return Promise.all([eventPipelineService(), taskService(timeFrame)]).then(
-        (res) => res.forEach((r) => expect(r).toBeTruthy()),
+    return Promise.all([eventService(), taskService(timeFrame)]).then((res) =>
+        res.forEach((r) => expect(r).toBeTruthy()),
     );
 });

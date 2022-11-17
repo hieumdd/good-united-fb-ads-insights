@@ -1,7 +1,6 @@
 {
     "name": "good-united-fb-ads-insights",
-    "version": "3.1.0",
-    "repository": "https://github.com/hieumdd/good-united-fb-ads-insights.git",
+    "version": "4.0.0",
     "author": "HM <hieumdd@gmail.com>",
     "license": "MIT",
     "devDependencies": {
@@ -22,7 +21,6 @@
         "dayjs": "^1.10.7",
         "lodash": "^4.17.21",
         "mongodb": "4.11",
-        "mongoose": "^6.2.3",
         "uuid": "^8.3.2"
     },
     "jest": {
