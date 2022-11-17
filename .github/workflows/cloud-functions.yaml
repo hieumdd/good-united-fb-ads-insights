@@ -47,7 +47,7 @@ jobs:
           echo "PUBLIC_URL: ${{ env.PUBLIC_URL }}" >> ${{ env.ENV_FILE }}
 
       - run: >-
-          gcloud functions deploy ${{ needs.set-env.outputs.fn-name }}
+          gcloud functions deploy ${{ env.FUNCTION_NAME }}
           --entry-point=main
           --source=dist
           --region=us-central1
