@@ -23,7 +23,11 @@ export const taskService = async ({ start, end }: TimeFrame) => {
             adAccounts
                 .flatMap(({ ids }) => ids)
                 .reduce(
-                    (p, x) => [...p, ...Object.keys(pipelines).map((y) => [x, y])] as [string, Pipeline][],
+                    (p, x) =>
+                        [...p, ...Object.keys(pipelines).map((y) => [x, y])] as [
+                            string,
+                            Pipeline,
+                        ][],
                     [] as [string, Pipeline][],
                 )
                 .map(([accountId, pipeline]) => ({
@@ -33,5 +37,6 @@ export const taskService = async ({ start, end }: TimeFrame) => {
                     end,
                 })),
         )
+        .then((tasks) => tasks.filter((task) => !!task.accountId))
         .then((tasks) => createTasks(tasks, ({ accountId }) => accountId));
 };
