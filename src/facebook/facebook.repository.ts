@@ -42,9 +42,7 @@ const getClient = async () => {
     );
 };
 
-export const get = async (
-    options: InsightsOptions & ReportOptions,
-): Promise<InsightsData> => {
+export const get = async (options: InsightsOptions & ReportOptions): Promise<InsightsData> => {
     const client = await getClient();
 
     const requestReport = async (): Promise<string> => {
@@ -86,8 +84,7 @@ export const get = async (
             })
             .then((res) => res.data);
 
-        return data.async_percent_completion === 100 &&
-            data.async_status === 'Job Completed'
+        return data.async_percent_completion === 100 && data.async_status === 'Job Completed'
             ? reportId
             : pollReport(reportId);
     };
@@ -103,10 +100,7 @@ export const get = async (
                 .then((res) => res.data);
 
             return data.paging.next
-                ? [
-                      ...data.data,
-                      ...(await _getInsights(data.paging.cursors.after)),
-                  ]
+                ? [...data.data, ...(await _getInsights(data.paging.cursors.after))]
                 : data.data;
         };
 
@@ -117,7 +111,9 @@ export const get = async (
         .then(pollReport)
         .then(getInsights)
         .catch((err) => {
-            axios.isAxiosError(err) && console.log(err.response?.data);
+            if (axios.isAxiosError(err)) {
+                console.log('facebook error', JSON.stringify(err.response?.data));
+            }
             return [];
         });
 };
