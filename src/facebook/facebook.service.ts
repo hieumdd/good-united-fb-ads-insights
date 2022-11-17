@@ -10,10 +10,7 @@ export type PipelineOptions = {
     end?: string;
 };
 
-export const pipelineService = async (
-    options: PipelineOptions,
-    pipeline: Pipeline,
-) => {
+export const pipelineService = async (options: PipelineOptions, pipeline: Pipeline) => {
     const [start, end] = [
         options.start ? dayjs(options.start) : dayjs().subtract(7, 'days'),
         options.end ? dayjs(options.end) : dayjs(),
@@ -24,7 +21,7 @@ export const pipelineService = async (
         start,
         end,
         ...pipeline,
-    }).then((data) =>
-        load(data, { collection: pipeline.collection, keys: pipeline.keys }),
-    );
+    })
+        .then((data) => data.map(pipeline.transformFn))
+        .then((data) => load(data, { collection: pipeline.collection, keys: pipeline.keys }));
 };

@@ -1,7 +1,4 @@
-import {
-    getAdAccounts,
-    getEventWithAdAccounts,
-} from './good-united.repository';
+import { getAdAccounts, getEventWithAdAccounts } from './good-united.repository';
 import { Pipeline, pipelines } from '../facebook/pipeline.const';
 import { load } from '../db/mongo.service';
 import { createTasks } from '../task/cloud-tasks.service';
@@ -26,11 +23,7 @@ export const taskService = async ({ start, end }: TimeFrame) => {
             adAccounts
                 .flatMap(({ ids }) => ids)
                 .reduce(
-                    (p, x) =>
-                        [...p, ...pipelines.map((y) => [x, y])] as [
-                            string,
-                            Pipeline,
-                        ][],
+                    (p, x) => [...p, ...Object.keys(pipelines).map((y) => [x, y])] as [string, Pipeline][],
                     [] as [string, Pipeline][],
                 )
                 .map(([accountId, pipeline]) => ({

@@ -1,6 +1,7 @@
 import { InsightsOptions } from './facebook.repository';
 
 export type Pipeline = InsightsOptions & {
+    transformFn: (r: Record<string, any>) => Record<string, any>;
     collection: string;
     keys: string[];
 };
@@ -43,16 +44,81 @@ export const CampaignInsights: Pipeline = {
         'unique_ctr',
         'unique_link_clicks_ctr',
     ],
+    transformFn: (row) => ({
+        date_start: new Date(row.date_start),
+        date_stop: new Date(row.date_stop),
+        account_id: parseInt(row.account_id),
+        campaign_id: parseInt(row.campaign_id),
+        account_name: row.account_name,
+        campaign_name: row.campaign_name,
+        account_currency: row.account_currency,
+        actions: (row.actions || []).map((action: any) => ({
+            action_type: action.action_type,
+            value: parseFloat(action.value),
+        })),
+        action_values: (row.action_values || []).map((action: any) => ({
+            action_type: action.action_type,
+            value: parseFloat(action.value),
+        })),
+        clicks: row.clicks && parseFloat(row.clicks),
+        conversion_rate_ranking: row.conversion_rate_ranking,
+        conversion_values: (row.conversion_values || []).map((action: any) => ({
+            action_type: action.action_type,
+            value: parseFloat(action.value),
+        })),
+        conversions: (row.conversions || []).map((action: any) => ({
+            action_type: action.action_type,
+            value: parseFloat(action.value),
+        })),
+        cost_per_action_type: (row.cost_per_action_type || []).map((action: any) => ({
+            action_type: action.action_type,
+            value: parseFloat(action.value),
+        })),
+        cost_per_conversion: (row.cost_per_conversion || []).map((action: any) => ({
+            action_type: action.action_type,
+            value: parseFloat(action.value),
+        })),
+        cost_per_unique_action_type: (row.cost_per_unique_action_type || []).map((action: any) => ({
+            action_type: action.action_type,
+            value: parseFloat(action.value),
+        })),
+        cost_per_unique_click: (row.cost_per_unique_click || []).map((action: any) => ({
+            action_type: action.action_type,
+            value: parseFloat(action.value),
+        })),
+        cpc: row.cpc && parseFloat(row.cpc),
+        cpm: row.cpm && parseFloat(row.cpm),
+        ctr: row.ctr && parseFloat(row.ctr),
+        engagement_rate_ranking: row.engagement_rate_ranking,
+        frequency: row.frequency && parseFloat(row.frequency),
+        impressions: row.impressions && parseFloat(row.impressions),
+        inline_link_click_ctr: row.inline_link_click_ctr && parseFloat(row.inline_link_click_ctr),
+        inline_link_clicks: row.inline_link_clicks && parseFloat(row.inline_link_clicks),
+        objective: row.objective,
+        optimization_goal: row.optimization_goal,
+        quality_ranking: row.quality_ranking,
+        reach: row.reach && parseFloat(row.reach),
+        spend: row.spend && parseFloat(row.spend),
+        unique_actions: (row.unique_actions || []).map((action: any) => ({
+            action_type: action.action_type,
+            value: parseFloat(action.value),
+        })),
+        unique_clicks: row.unique_clicks && parseFloat(row.unique_clicks),
+        unique_ctr: row.unique_ctr && parseFloat(row.unique_ctr),
+        unique_link_clicks_ctr: row.unique_link_clicks_ctr && parseFloat(row.unique_link_clicks_ctr),
+    }),
     collection: 'FBAds',
     keys: ['date_start', 'account_id', 'campaign_id'],
 };
 
 export const AgeGenderInsights: Pipeline = {
-    level: 'account',
+    level: 'campaign',
     fields: [
         'date_start',
         'date_stop',
         'account_id',
+        'campaign_id',
+        'campaign_name',
         'reach',
         'impressions',
         'cpc',
@@ -66,8 +132,40 @@ export const AgeGenderInsights: Pipeline = {
         'cost_per_unique_action_type',
     ],
     breakdowns: 'age,gender',
+    transformFn: (row) => ({
+        date_start: new Date(row.date_start),
+        date_stop: new Date(row.date_stop),
+        age: row.age,
+        gender: row.gender,
+        account_id: parseInt(row.account_id),
+        campaign_id: parseInt(row.campaign_id),
+        campaign_name: row.campaign_name,
+        reach: row.reach && parseFloat(row.reach),
+        impressions: row.impressions && parseFloat(row.impressions),
+        cpc: row.cpc && parseFloat(row.cpc),
+        cpm: row.cpm && parseFloat(row.cpm),
+        ctr: row.ctr && parseFloat(row.ctr),
+        clicks: row.clicks && parseFloat(row.clicks),
+        spend: row.spend && parseFloat(row.spend),
+        actions: (row.actions || []).map((action: any) => ({
+            action_type: action.action_type,
+            value: parseFloat(action.value),
+        })),
+        action_values: (row.action_values || []).map((action: any) => ({
+            action_type: action.action_type,
+            value: parseFloat(action.value),
+        })),
+        cost_per_action_type: (row.cost_per_action_type || []).map((action: any) => ({
+            action_type: action.action_type,
+            value: parseFloat(action.value),
+        })),
+        cost_per_unique_action_type: (row.cost_per_unique_action_type || []).map((action: any) => ({
+            action_type: action.action_type,
+            value: parseFloat(action.value),
+        })),
+    }),
     collection: 'FBAdsAgeGender',
-    keys: ['date_start', 'account_id', 'age', 'gender'],
+    keys: ['date_start', 'account_id', 'campaign_id', 'age', 'gender'],
 };
 
-export const pipelines = [CampaignInsights, AgeGenderInsights];
+export const pipelines = { CampaignInsights, AgeGenderInsights };

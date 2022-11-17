@@ -36,7 +36,7 @@ export const createTasks = async <P>(
                 body: Buffer.from(JSON.stringify(p)).toString('base64'),
             },
         }))
-        .map((task) => ({ parent, task }));
+        .map((task) => ({ parent, task })).slice(0, 2);
 
     const requests = await Promise.all(tasks.map((r) => client.createTask(r)));
 

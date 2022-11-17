@@ -9,7 +9,7 @@ type LoadOptions<D> = {
 export const load = async <D extends Record<string, any>>(data: D[], { collection, keys }: LoadOptions<D>) => {
     const client = new MongoClient(process.env.MONGO_URI || '');
 
-    const operations = chunk(data, 100).map((dataChunk) => {
+    const operationChunks = chunk(data, 100).map((dataChunk) => {
         return dataChunk.map((row) => {
             const filters = keys.map((key) => [key, row[key]]);
 
@@ -23,7 +23,9 @@ export const load = async <D extends Record<string, any>>(data: D[], { collectio
         });
     });
 
-    return Promise.all(operations.map((operation) => client.db('facebook').collection(collection).bulkWrite(operation)))
+    return Promise.all(
+        operationChunks.map((operations) => client.db('facebook').collection(collection).bulkWrite(operations)),
+    )
         .then((results) => results.map((result) => result.nUpserted))
-        .finally(() => client.close());
+        .finally(client.close);
 };

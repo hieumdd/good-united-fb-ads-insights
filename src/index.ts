@@ -1,22 +1,20 @@
 import { HttpFunction } from '@google-cloud/functions-framework/build/src/functions';
 
-import { Pipeline } from './facebook/pipeline.const';
+import { pipelines } from './facebook/pipeline.const';
 import { pipelineService } from './facebook/facebook.service';
 import { eventService, taskService } from './good-united/good-united.service';
 
 type Body = {
+    pipeline: keyof typeof pipelines;
     accountId: string;
     start?: string;
     end?: string;
-    pipeline: Pipeline;
 };
 
 export const main: HttpFunction = async (req, res) => {
     const { body }: { body: Body } = req;
 
     console.log('body', JSON.stringify(body));
-
-    console.log('accountId', body.accountId);
 
     const retryCount = req.get('X-CloudTasks-TaskRetryCount');
 
@@ -32,7 +30,7 @@ export const main: HttpFunction = async (req, res) => {
                       start: body.start,
                       end: body.end,
                   },
-                  body.pipeline,
+                  pipelines[body.pipeline],
               )
             : await Promise.all([eventService(), taskService(body)]);
 
