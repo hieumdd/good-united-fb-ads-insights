@@ -16,6 +16,8 @@ export const main: HttpFunction = async (req, res) => {
 
     console.log('body', JSON.stringify(body));
 
+    console.log('accountId', body.accountId);
+
     const retryCount = req.get('X-CloudTasks-TaskRetryCount');
 
     if (retryCount && parseInt(retryCount) >= 3) {
@@ -34,9 +36,9 @@ export const main: HttpFunction = async (req, res) => {
               )
             : await Promise.all([eventService(), taskService(body)]);
 
-        console.log(result);
+        console.log('result', JSON.stringify(result));
 
-        res.status(200).send(result);
+        res.status(200).json({ result });
 
         return;
     }
