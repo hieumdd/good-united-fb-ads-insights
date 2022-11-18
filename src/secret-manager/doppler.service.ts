@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const getSecret = (name: string) => () =>
+export const getSecret = (name: string) =>
     axios
         .get('https://api.doppler.com/v3/configs/config/secret', {
             params: {
