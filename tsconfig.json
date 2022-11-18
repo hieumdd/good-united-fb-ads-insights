@@ -1,12 +1,9 @@
 {
     "extends": "@tsconfig/node16/tsconfig.json",
-    "compilerOptions": {
-        "outDir": "dist",
-    },
     "include": [
-        "./src/**/*"
+        "./src/**/*",
     ],
-    "exclude": [
-        "./src/aggregation.ts"
-    ]
+    "compilerOptions": {
+        "sourceMap": true,
+    }
 }
