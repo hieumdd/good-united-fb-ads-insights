@@ -1,3 +1,5 @@
+import { setTimeout } from 'node:timers/promises';
+
 import axios from 'axios';
 import { Dayjs } from 'dayjs';
 
@@ -55,16 +57,8 @@ export const get = async (options: InsightsOptions & ReportOptions): Promise<Ins
                     fields: options.fields,
                     breakdowns: options.breakdowns,
                     filter: [
-                        {
-                            field: 'ad.impressions',
-                            operator: 'GREATER_THAN',
-                            value: 0,
-                        },
-                        {
-                            field: 'campaign.name',
-                            operator: 'CONTAIN',
-                            value: `LEADS`,
-                        },
+                        { field: 'ad.impressions', operator: 'GREATER_THAN', value: 0 },
+                        { field: 'campaign.name', operator: 'CONTAIN', value: `LEADS` },
                     ],
                     time_range: JSON.stringify({
                         since: options.start.format('YYYY-MM-DD'),
@@ -84,9 +78,14 @@ export const get = async (options: InsightsOptions & ReportOptions): Promise<Ins
             })
             .then((res) => res.data);
 
-        return data.async_percent_completion === 100 && data.async_status === 'Job Completed'
-            ? reportId
-            : pollReport(reportId);
+        if (data.async_percent_completion === 100 && data.async_status === 'Job Completed') {
+            return reportId;
+        } else if (data.async_status === 'Job Failed') {
+            throw new Error('Facebook Error');
+        } else {
+            await setTimeout(5_000);
+            return pollReport(reportId);
+        }
     };
 
     const getInsights = async (reportId: string): Promise<InsightsData> => {
