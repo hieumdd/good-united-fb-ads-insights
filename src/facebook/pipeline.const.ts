@@ -65,7 +65,7 @@ export const CampaignInsights: Pipeline = {
         cost_per_action_type: actionBreakdownSchema,
         cost_per_conversion: actionBreakdownSchema,
         cost_per_unique_action_type: actionBreakdownSchema,
-        cost_per_unique_click: actionBreakdownSchema,
+        cost_per_unique_click: Joi.number(),
         cpc: Joi.number(),
         cpm: Joi.number(),
         ctr: Joi.number(),
