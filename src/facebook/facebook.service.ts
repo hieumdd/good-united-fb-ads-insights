@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import Joi from 'joi';
 
 import { Pipeline } from './pipeline.const';
 import { get } from './facebook.repository';
@@ -16,12 +17,7 @@ export const pipelineService = async (options: PipelineOptions, pipeline: Pipeli
         options.end ? dayjs(options.end) : dayjs(),
     ];
 
-    return get({
-        accountId: options.accountId,
-        start,
-        end,
-        ...pipeline,
-    })
-        .then((rows) => rows.map((row) => pipeline.schema.validate(row, { abortEarly: false }).value))
+    return get({ accountId: options.accountId, start, end, ...pipeline })
+        .then((rows) => rows.map((row) => Joi.attempt(row, pipeline.schema)))
         .then((data) => load(data, { collection: pipeline.collection, keys: pipeline.keys }));
 };
