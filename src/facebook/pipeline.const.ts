@@ -59,7 +59,7 @@ export const CampaignInsights: Pipeline = {
         action_values: actionBreakdownSchema,
         actions: actionBreakdownSchema,
         clicks: Joi.number(),
-        conversation_rate_ranking: Joi.string(),
+        conversion_rate_ranking: Joi.string(),
         conversion_values: actionBreakdownSchema,
         conversions: actionBreakdownSchema,
         cost_per_action_type: actionBreakdownSchema,
