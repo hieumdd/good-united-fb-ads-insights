@@ -186,4 +186,8 @@ export const AgeGenderAdInsights: Pipeline = {
     keys: ['date_start', 'account_id', 'campaign_id', 'adset_id', 'ad_id', 'age', 'gender'],
 };
 
-export const pipelines = { CampaignInsights, AgeGenderInsights, AgeGenderAdInsights };
+export const pipelines = {
+    CampaignInsights,
+    AgeGenderInsights,
+    // AgeGenderAdInsights
+};
