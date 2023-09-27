@@ -1,6 +1,6 @@
 {
     "name": "good-united-fb-ads-insights",
-    "version": "5.0.0",
+    "version": "5.1.0",
     "author": "HM <hieumdd@gmail.com>",
     "license": "MIT",
     "devDependencies": {
@@ -12,6 +12,7 @@
         "@types/uuid": "^9.0.4",
         "dotenv": "^16.3.1",
         "jest": "^29.7.0",
+        "prettier": "^3.0.3",
         "ts-jest": "^29.1.1",
         "typescript": "^5.2.2"
     },
