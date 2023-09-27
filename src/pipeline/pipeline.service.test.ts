@@ -25,8 +25,8 @@ it('runDimensionPipeline', async () => {
 
 it('createInsightsPipelineTasks', async () => {
     return createInsightsPipelineTasks({
-        start: '2023-08-28',
-        end: '2023-09-04',
+        start: '2023-09-20',
+        end: '2023-09-27',
     })
         .then((result) => expect(result).toBeDefined())
         .catch((error) => {
