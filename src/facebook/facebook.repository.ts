@@ -3,7 +3,7 @@ import { setTimeout } from 'node:timers/promises';
 import axios from 'axios';
 import { Dayjs } from 'dayjs';
 
-import { getSecret } from '../secret-manager/doppler.service';
+import { getSecret } from '../doppler.service';
 
 export type InsightsOptions = {
     level: string;
@@ -34,7 +34,7 @@ type InsightsResponse = {
 };
 
 const getClient = async () => {
-    const API_VER = 'v15.0';
+    const API_VER = 'v18.0';
 
     return getSecret('FACEBOOK_ACCESS_TOKEN').then((access_token) =>
         axios.create({

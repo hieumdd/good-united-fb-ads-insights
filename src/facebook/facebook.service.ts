@@ -3,7 +3,7 @@ import Joi from 'joi';
 
 import { Pipeline } from './pipeline.const';
 import { get } from './facebook.repository';
-import { load } from '../db/mongo.service';
+import { load } from '../mongo.service';
 
 export type PipelineOptions = {
     accountId: string;
