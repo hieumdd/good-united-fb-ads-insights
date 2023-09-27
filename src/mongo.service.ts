@@ -1,36 +1,47 @@
+import { Writable } from 'node:stream';
 import { MongoClient } from 'mongodb';
-import { chunk } from 'lodash';
+import BatchStream from 'batch-stream';
 
-type LoadOptions<D> = {
+import { logger } from './logging.service';
+
+export type CreateUpsertStreamConfig = {
     collection: string;
-    keys: (keyof D)[];
+    keys: string[];
 };
 
-export const load = async <D extends Record<string, any>>(
-    data: D[],
-    { collection, keys }: LoadOptions<D>,
-) => {
+export const createUpsertStream = async ({ collection, keys }: CreateUpsertStreamConfig) => {
     const client = await MongoClient.connect(process.env.MONGO_URI || '');
+    const db = client.db('facebook');
 
-    const operationChunks = chunk(data, 100).map((dataChunk) => {
-        return dataChunk.map((row) => {
-            const filters = keys.map((key) => [key, row[key]]);
-
-            return {
+    const writeStream = new Writable({
+        objectMode: true,
+        write: (rows: any[], _, callback) => {
+            const operations = rows.map((row) => ({
                 updateOne: {
-                    filter: Object.fromEntries(filters),
+                    filter: Object.fromEntries(keys.map((key) => [key, row[key]])),
                     update: { $set: row },
                     upsert: true,
                 },
-            };
-        });
+            }));
+
+            db.collection(collection)
+                .bulkWrite(operations)
+                .then((result) => {
+                    logger.info({
+                        fn: 'mongo.service:createUpsertStream',
+                        result: { upsertedCount: result.upsertedCount },
+                    });
+                    callback();
+                })
+                .catch((error) => {
+                    logger.error({ fn: 'mongo.service:createUpsertStream', error });
+                    callback(error);
+                });
+        },
     });
 
-    return Promise.all(
-        operationChunks.map((operations) => {
-            return client.db('facebook').collection(collection).bulkWrite(operations);
-        }),
-    )
-        .then((results) => results.map((result) => result.upsertedCount))
-        .finally(() => client.close());
+    return {
+        upsertStreams: [new BatchStream({ size: 500 }), writeStream] as const,
+        callback: () => client.close(),
+    };
 };

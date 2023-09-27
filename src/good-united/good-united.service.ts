@@ -1,42 +1,92 @@
-import { getAdAccounts, getEventWithAdAccounts } from './good-united.repository';
-import { Pipeline, pipelines } from '../facebook/pipeline.const';
-import { load } from '../mongo.service';
-import { createTasks } from '../cloud-tasks.service';
+import axios from 'axios';
 
-export const eventService = async () => {
-    return getEventWithAdAccounts().then((data) =>
-        load(data, {
-            collection: 'Events',
-            keys: ['adAccountId', 'eventId', 'nonProfit'],
-        }),
+import { logger } from '../logging.service';
+
+const getClient = () => {
+    const client = axios.create({
+        baseURL: 'https://abc.1gu.xyz',
+        headers: { key: process.env.API_KEY || '' },
+    });
+
+    client.interceptors.response.use(
+        (response) => response,
+        (error) => {
+            logger.error({ fn: 'good-united.repository:client', error });
+            throw error;
+        },
     );
+
+    return client;
 };
 
-type TimeFrame = {
-    start?: string;
-    end?: string;
+type AdAccount = {
+    adAccount: string;
+    ids: string[];
 };
 
-export const taskService = async ({ start, end }: TimeFrame) => {
-    return getAdAccounts()
-        .then((adAccounts) =>
-            adAccounts
-                .flatMap(({ ids }) => ids)
-                .reduce(
-                    (p, x) =>
-                        [...p, ...Object.keys(pipelines).map((y) => [x, y])] as [
-                            string,
-                            Pipeline,
-                        ][],
-                    [] as [string, Pipeline][],
-                )
-                .map(([accountId, pipeline]) => ({
-                    pipeline,
-                    accountId,
-                    start,
-                    end,
-                })),
+export const getAdAccounts = async (): Promise<AdAccount[]> => {
+    return getClient()
+        .request<{ [key: string]: string[] }>({ method: 'GET', url: '/adAccounts' })
+        .then(({ data }) => {
+            return Object.entries(data).map(([adAccount, ids]) => ({
+                adAccount,
+                ids: ids.map((i) => i.trim()),
+            }));
+        })
+        .catch(() => []);
+};
+
+type Event = {
+    eventId: string;
+    nonProfit: string;
+    start: Date;
+    end: Date;
+};
+
+const getEvents = async (): Promise<Event[]> => {
+    type EventResponse = {
+        ID: string;
+        Nonprofit: string;
+        'Live Date': string;
+        'Start Date': string;
+    };
+
+    return getClient()
+        .request<EventResponse[]>({ method: 'GET', url: '/events' })
+        .then(({ data }) =>
+            data.map((i) => ({
+                eventId: i['ID'],
+                nonProfit: i['Nonprofit'],
+                start: new Date(i['Live Date']),
+                end: new Date(i['Start Date']),
+            })),
         )
-        .then((tasks) => tasks.filter((task) => !!task.accountId))
-        .then((tasks) => createTasks(tasks, ({ accountId }) => accountId));
+        .catch(() => []);
+};
+
+export type EventWithAdAccount = {
+    adAccountId: string;
+    eventId: string;
+    nonProfit: string;
+    start: Date;
+    end: Date;
+};
+
+export const getEventWithAdAccounts = async (): Promise<EventWithAdAccount[]> => {
+    const [events, adAccounts] = await Promise.all([getEvents(), getAdAccounts()]);
+
+    return events
+        .flatMap((event) => {
+            const mappedAdAccount = adAccounts.find(
+                ({ adAccount }) => adAccount === event.nonProfit,
+            );
+
+            return mappedAdAccount
+                ? mappedAdAccount.ids.map((adAccountId) => ({
+                      ...event,
+                      adAccountId,
+                  }))
+                : undefined;
+        })
+        .filter((i) => i?.adAccountId) as EventWithAdAccount[];
 };
