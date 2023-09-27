@@ -3,7 +3,7 @@ import { setTimeout } from 'node:timers/promises';
 import axios from 'axios';
 import { Dayjs } from 'dayjs';
 
-import { getSecret } from '../secret-manager/doppler.service';
+import { getSecret } from '../doppler.service';
 
 export type InsightsOptions = {
     level: string;

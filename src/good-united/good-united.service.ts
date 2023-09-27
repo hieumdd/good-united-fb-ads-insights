@@ -1,7 +1,7 @@
 import { getAdAccounts, getEventWithAdAccounts } from './good-united.repository';
 import { Pipeline, pipelines } from '../facebook/pipeline.const';
-import { load } from '../db/mongo.service';
-import { createTasks } from '../task/cloud-tasks.service';
+import { load } from '../mongo.service';
+import { createTasks } from '../cloud-tasks.service';
 
 export const eventService = async () => {
     return getEventWithAdAccounts().then((data) =>
