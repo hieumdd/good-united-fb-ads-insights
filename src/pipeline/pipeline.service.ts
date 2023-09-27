@@ -61,7 +61,9 @@ export const runDimensionPipeline = async () => {
 export const createInsightsPipelineTasks = async ({ start, end }: CreatePipelineTasksBody) => {
     logger.info({ fn: 'createInsightsPipelineTasks', options: { start, end } });
 
-    const accountIds = await getAdAccounts().then((accounts) => accounts.flatMap(({ ids }) => ids));
+    const accountIds = await getAdAccounts().then((accounts) => {
+        return accounts.flatMap(({ ids }) => ids).filter((id) => !!id);
+    });
 
     return Promise.all(
         Object.keys(pipelines)
