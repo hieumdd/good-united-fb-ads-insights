@@ -1,9 +1,5 @@
 import * as pipelines from './pipeline.const';
-import {
-    runDimensionPipeline,
-    runInsightsPipeline,
-    createInsightsPipelineTasks,
-} from './pipeline.service';
+import { runDimensionPipeline, runInsightsPipeline, createInsightsPipelineTasks } from './pipeline.service';
 
 it('runInsightsPipeline', async () => {
     return runInsightsPipeline(pipelines.CAMPAIGN_INSIGHTS, {

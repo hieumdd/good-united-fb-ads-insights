@@ -11,9 +11,7 @@ export type Pipeline = {
     upsertConfig: CreateUpsertStreamConfig;
 };
 
-const actionBreakdownSchema = Joi.array()
-    .items({ action_type: Joi.string(), value: Joi.number() })
-    .optional();
+const actionBreakdownSchema = Joi.array().items({ action_type: Joi.string(), value: Joi.number() }).optional();
 
 export const CAMPAIGN_INSIGHTS: Pipeline = {
     getExtractStream: getInsightsStream({

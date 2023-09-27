@@ -77,9 +77,7 @@ export const getEventWithAdAccounts = async (): Promise<EventWithAdAccount[]> =>
 
     return events
         .flatMap((event) => {
-            const mappedAdAccount = adAccounts.find(
-                ({ adAccount }) => adAccount === event.nonProfit,
-            );
+            const mappedAdAccount = adAccounts.find(({ adAccount }) => adAccount === event.nonProfit);
 
             return mappedAdAccount
                 ? mappedAdAccount.ids.map((adAccountId) => ({

@@ -9,10 +9,7 @@ import { CreatePipelineTasksBody, PipelineOptions } from './pipeline.request.dto
 import * as pipelines from './pipeline.const';
 import { getAdAccounts, getEventWithAdAccounts } from '../good-united/good-united.service';
 
-export const runInsightsPipeline = async (
-    pipeline_: pipelines.Pipeline,
-    options: PipelineOptions,
-) => {
+export const runInsightsPipeline = async (pipeline_: pipelines.Pipeline, options: PipelineOptions) => {
     logger.info({
         fn: 'pipeline.service:runPipeline',
         pipeline: pipeline_.upsertConfig.collection,

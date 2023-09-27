@@ -3,6 +3,9 @@
     "version": "5.1.0",
     "author": "HM <hieumdd@gmail.com>",
     "license": "MIT",
+    "scripts": {
+        "format": "prettier -w ./src"
+    },
     "devDependencies": {
         "@tsconfig/node18": "^18.2.2",
         "@types/batch-stream": "^0.1.33",

@@ -49,10 +49,7 @@ export type GetResponse = {
     paging?: { cursors: { after: string }; next: string };
 };
 
-export const getExtractStream = async (
-    client: AxiosInstance,
-    config: (after?: string) => AxiosRequestConfig,
-) => {
+export const getExtractStream = async (client: AxiosInstance, config: (after?: string) => AxiosRequestConfig) => {
     const stream = new Readable({ objectMode: true, read: () => {} });
 
     const _get = (after?: string) => {

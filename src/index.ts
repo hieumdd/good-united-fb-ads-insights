@@ -3,15 +3,8 @@ import express from 'express';
 
 import { logger } from './logging.service';
 import * as pipelines from './pipeline/pipeline.const';
-import {
-    runInsightsPipeline,
-    runDimensionPipeline,
-    createInsightsPipelineTasks,
-} from './pipeline/pipeline.service';
-import {
-    CreatePipelineTasksBodySchema,
-    RunPipelineBodySchema,
-} from './pipeline/pipeline.request.dto';
+import { runInsightsPipeline, runDimensionPipeline, createInsightsPipelineTasks } from './pipeline/pipeline.service';
+import { CreatePipelineTasksBodySchema, RunPipelineBodySchema } from './pipeline/pipeline.request.dto';
 
 const app = express();
 
