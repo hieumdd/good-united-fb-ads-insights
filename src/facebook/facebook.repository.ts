@@ -1,8 +1,8 @@
 import { setTimeout } from 'node:timers/promises';
-
 import axios from 'axios';
 import { Dayjs } from 'dayjs';
 
+import { logger } from '../logging.service';
 import { getSecret } from '../doppler.service';
 
 export type InsightsOptions = {
@@ -109,10 +109,8 @@ export const get = async (options: InsightsOptions & ReportOptions): Promise<Ins
     return requestReport()
         .then(pollReport)
         .then(getInsights)
-        .catch((err) => {
-            if (axios.isAxiosError(err)) {
-                console.log('facebook error', JSON.stringify(err.response?.data));
-            }
+        .catch((error) => {
+            logger.error({ fn: 'facebook.repository:get', error });
             return [];
         });
 };

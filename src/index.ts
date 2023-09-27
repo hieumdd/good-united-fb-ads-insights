@@ -1,8 +1,17 @@
-import { HttpFunction } from '@google-cloud/functions-framework/build/src/functions';
+import { http } from '@google-cloud/functions-framework';
+import express from 'express';
 
+import { logger } from './logging.service';
 import { pipelines } from './facebook/pipeline.const';
 import { pipelineService } from './facebook/facebook.service';
 import { eventService, taskService } from './good-united/good-united.service';
+
+const app = express();
+
+app.use(({ headers, path, body }, _, next) => {
+    logger.info({ headers, path, body });
+    next();
+});
 
 type Body = {
     pipeline: keyof typeof pipelines;
@@ -11,29 +20,31 @@ type Body = {
     end?: string;
 };
 
-export const main: HttpFunction = async (req, res) => {
-    const { body }: { body: Body } = req;
+app.use('/', (req, res) => {
+    const body = req.body as Body;
 
-    console.log('body', JSON.stringify(body));
-
-    const retryCount = req.get('X-CloudTasks-TaskRetryCount');
-
-    if (retryCount && parseInt(retryCount) >= 3) {
-        res.status(200).send({ ok: true });
-    } else if (body.accountId && body.pipeline) {
+    if (body.accountId && body.pipeline) {
         pipelineService(
-            {
-                accountId: body.accountId,
-                start: body.start,
-                end: body.end,
-            },
+            { accountId: body.accountId, start: body.start, end: body.end },
             pipelines[body.pipeline],
-        ).then((result) => res.status(200).json({ result }));
-    } else if (!body.accountId && body.pipeline) {
-        await Promise.all([eventService(), taskService(body)]).then((result) =>
-            res.status(200).json({ result }),
-        );
-    } else {
-        res.status(400).json({ error: 'error' });
+        )
+            .then((result) => res.status(200).json({ result }))
+            .catch((error) => {
+                logger.error({ error });
+                res.status(500).json({ error });
+            });
+        return;
     }
-};
+
+    if (!body.accountId && body.pipeline) {
+        Promise.all([eventService(), taskService(body)])
+            .then((result) => res.status(200).json({ result }))
+            .catch((error) => {
+                logger.error({ error });
+                res.status(500).json({ error });
+            });
+        return;
+    }
+});
+
+http('main', app);

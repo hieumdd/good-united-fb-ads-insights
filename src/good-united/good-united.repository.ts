@@ -1,33 +1,36 @@
 import axios from 'axios';
 
+import { logger } from '../logging.service';
+
 const client = axios.create({
     baseURL: 'https://abc.1gu.xyz',
-    headers: {
-        key: process.env.API_KEY || '',
-    },
+    headers: { key: process.env.API_KEY || '' },
 });
+
+client.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        logger.error({ fn: 'good-united.repository:client', error });
+        throw error;
+    },
+);
 
 type AdAccount = {
     adAccount: string;
     ids: string[];
 };
 
-export const getAdAccounts = async (): Promise<AdAccount[]> =>
-    client
-        .request<{ [key: string]: string[] }>({
-            method: 'GET',
-            url: '/adAccounts',
-        })
-        .then(({ data }) =>
-            Object.entries(data).map(([adAccount, ids]) => ({
+export const getAdAccounts = async (): Promise<AdAccount[]> => {
+    return client
+        .request<{ [key: string]: string[] }>({ method: 'GET', url: '/adAccounts' })
+        .then(({ data }) => {
+            return Object.entries(data).map(([adAccount, ids]) => ({
                 adAccount,
                 ids: ids.map((i) => i.trim()),
-            })),
-        )
-        .catch((err) => {
-            axios.isAxiosError(err) && console.log(err.response?.data);
-            return [];
-        });
+            }));
+        })
+        .catch(() => []);
+};
 
 type EventResponse = {
     ID: string;
@@ -43,8 +46,8 @@ type Event = {
     end: Date;
 };
 
-const getEvents = async (): Promise<Event[]> =>
-    client
+const getEvents = async (): Promise<Event[]> => {
+    return client
         .request<EventResponse[]>({ method: 'GET', url: '/events' })
         .then(({ data }) =>
             data.map((i) => ({
@@ -54,10 +57,8 @@ const getEvents = async (): Promise<Event[]> =>
                 end: new Date(i['Start Date']),
             })),
         )
-        .catch((err) => {
-            axios.isAxiosError(err) && console.log(err.response?.data);
-            return [];
-        });
+        .catch(() => []);
+};
 
 export type EventWithAdAccount = {
     adAccountId: string;
@@ -67,13 +68,8 @@ export type EventWithAdAccount = {
     end: Date;
 };
 
-export const getEventWithAdAccounts = async (): Promise<
-    EventWithAdAccount[]
-> => {
-    const [events, adAccounts] = await Promise.all([
-        getEvents(),
-        getAdAccounts(),
-    ]);
+export const getEventWithAdAccounts = async (): Promise<EventWithAdAccount[]> => {
+    const [events, adAccounts] = await Promise.all([getEvents(), getAdAccounts()]);
 
     return events
         .flatMap((event) => {
