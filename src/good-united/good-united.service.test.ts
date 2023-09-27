@@ -1,20 +1,9 @@
-import { eventService, taskService } from './good-united.service';
+import { getAdAccounts, getEventWithAdAccounts } from './good-united.service';
 
-it('Event Service', async () => {
-    return eventService().then((res) => expect(res).toBeTruthy());
+it('getAdAccounts', async () => {
+    return getAdAccounts().then((result) => expect(result).toBeDefined());
 });
 
-const timeFrame = {
-    start: '2022-11-01',
-    end: '2022-11-15',
-};
-
-it('Task Service', async () => {
-    return taskService(timeFrame).then((res) => expect(res).toBeTruthy());
-});
-
-it('Controller', async () => {
-    return Promise.all([eventService(), taskService(timeFrame)]).then((res) =>
-        res.forEach((r) => expect(r).toBeTruthy()),
-    );
+it('getEventWithAdAccounts', async () => {
+    return getEventWithAdAccounts().then((result) => expect(result).toBeDefined());
 });
