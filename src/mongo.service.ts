@@ -27,9 +27,9 @@ export const load = async <D extends Record<string, any>>(
     });
 
     return Promise.all(
-        operationChunks.map((operations) =>
-            client.db('facebook').collection(collection).bulkWrite(operations),
-        ),
+        operationChunks.map((operations) => {
+            return client.db('facebook').collection(collection).bulkWrite(operations);
+        }),
     )
         .then((results) => results.map((result) => result.upsertedCount))
         .finally(() => client.close());
