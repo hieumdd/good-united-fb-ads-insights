@@ -4,7 +4,7 @@ import { logger } from '../logging.service';
 
 const getClient = () => {
     const client = axios.create({
-        baseURL: 'https://abc.1gu.xyz',
+        baseURL: 'http://api.goodunited.io/',
         headers: { key: process.env.API_KEY || '' },
     });
 
